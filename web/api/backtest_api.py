@@ -9,6 +9,7 @@ from .config import (
     KLINE_TABLE_MAP, FRACTAL_TABLE_MAP, INTERVAL_MS
 )
 from .cache_manager import backtest_cache
+from .memory_monitor import log_memory, force_gc
 
 backtest_bp = Blueprint('backtest', __name__)
 
@@ -135,27 +136,15 @@ def _load_kline_with_signals(interval, start_date, end_date):
     return kline_data
 
 
-def _get_cache_key_params(params, kline_data):
+def _get_cache_key_params(params, interval, start_date, end_date):
     """
     生成用于缓存的参数字典
-    
-    包含：
-    1. 所有回测参数
-    2. 数据指纹（避免数据更新后仍使用旧缓存）
+    使用日期范围和interval作为数据指纹
     """
-    # 数据指纹：基于数据条数和首尾时间戳
-    data_fingerprint = None
-    if kline_data and len(kline_data) > 0:
-        data_fingerprint = {
-            "count": len(kline_data),
-            "first_time": kline_data[0]["time"] if isinstance(kline_data[0], dict) else kline_data[0][0],
-            "last_time": kline_data[-1]["time"] if isinstance(kline_data[-1], dict) else kline_data[-1][0],
-        }
-    
     return {
-        "interval": params.get("interval"),
-        "start_date": params.get("start_date"),
-        "end_date": params.get("end_date"),
+        "interval": interval,
+        "start_date": start_date,
+        "end_date": end_date,
         "mode": params.get("mode"),
         "stop_loss_pct": params.get("stop_loss_pct"),
         "take_profit_pct": params.get("take_profit_pct"),
@@ -166,7 +155,6 @@ def _get_cache_key_params(params, kline_data):
         "fixed_amount": params.get("fixed_amount"),
         "max_positions": params.get("max_positions"),
         "use_stop_profit": params.get("use_stop_profit"),
-        "data_fingerprint": data_fingerprint,
     }
 
 
@@ -175,6 +163,7 @@ def run_backtest():
     """
     全量回测入口 - 在Flask进程内直接执行（支持缓存）
     """
+    log_memory("回测开始")
     try:
         params = request.get_json()
         if not params:
@@ -205,18 +194,10 @@ def run_backtest():
         if capital < 1:
             return jsonify({"error": "初始资金至少 1"}), 400
 
-        # 加载K线数据并匹配分型信号
-        kline_data = _load_kline_with_signals(
-            interval,
-            params.get("start_date", ""),
-            params.get("end_date", ""),
-        )
-
-        if len(kline_data) < 10:
-            return jsonify({"error": f"K线数据不足 ({len(kline_data)} 根)"}), 400
-
-        # 生成缓存key参数
-        cache_params = _get_cache_key_params(params, kline_data)
+        # 生成缓存key参数（不依赖kline_data）
+        cache_params = _get_cache_key_params(params, interval, 
+                                            params.get("start_date", ""),
+                                            params.get("end_date", ""))
         
         # 检查缓存（除非明确要求跳过缓存）
         skip_cache = params.get("_skip_cache", False)
@@ -226,16 +207,10 @@ def run_backtest():
                 print(f"[Backtest] 缓存命中，直接返回结果")
                 return jsonify(cached_result)
 
-        # 在Flask进程内直接执行回测
-        engine_path = Path(__file__).resolve().parents[2] / "backtest" / "engine.py"
-        import importlib.util
-        spec = importlib.util.spec_from_file_location("backtest_engine_module", engine_path)
-        mod = importlib.util.module_from_spec(spec)
-        spec.loader.exec_module(mod)
-        BacktestEngine = mod.BacktestEngine
-
-        engine = BacktestEngine({
-            "kline_data": kline_data,
+        # 使用流式回测引擎 - 边读边算，不存储全部K线
+        from backtest.streaming_engine import StreamingBacktestEngine
+        
+        engine = StreamingBacktestEngine({
             "mode": mode,
             "stop_loss_pct": stop_loss,
             "take_profit_pct": take_profit,
@@ -248,7 +223,13 @@ def run_backtest():
             "use_stop_profit": params.get("use_stop_profit", True),
         })
 
-        result = engine.run()
+        # 流式执行 - 不加载全部K线到内存
+        result = engine.run_streaming(
+            interval,
+            params.get("start_date", ""),
+            params.get("end_date", "")
+        )
+        log_memory("回测引擎完成")
 
         if "error" in result:
             return jsonify(result), 400
@@ -257,6 +238,11 @@ def run_backtest():
         if not skip_cache:
             backtest_cache.set(cache_params, result)
             print(f"[Backtest] 结果已缓存")
+        
+        # 删除引用
+        del engine
+        force_gc()
+        log_memory("清理后")
 
         return jsonify(result)
 
