@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ETHUSDT 永续 - K线图</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <script src="https://unpkg.com/lightweight-charts@4.1.0/dist/lightweight-charts.standalone.production.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <!-- 顶部标题栏 -->
+        <header class="header">
+            <div class="symbol-info">
+                <span class="symbol-name">ETHUSDT</span>
+                <div class="price-container">
+                    <span class="price" id="current-price">--</span>
+                    <span class="change" id="price-change">
+                        <span class="change-indicator"></span>
+                        <span id="price-change-text">--</span>
+                    </span>
+                </div>
+            </div>
+            <!-- OHLC 信息显示 -->
+            <div class="ohlc-info" id="ohlc-info">
+                <span class="ohlc-item"><b>时间:</b> <span id="ohlc-time">--</span></span>
+                <span class="ohlc-item"><b>O:</b> <span id="ohlc-open">--</span></span>
+                <span class="ohlc-item"><b>H:</b> <span id="ohlc-high">--</span></span>
+                <span class="ohlc-item"><b>L:</b> <span id="ohlc-low">--</span></span>
+                <span class="ohlc-item"><b>C:</b> <span id="ohlc-close">--</span></span>
+                <span class="ohlc-item"><b>Vol:</b> <span id="ohlc-volume">--</span></span>
+            </div>
+        </header>
+        
+        <!-- 主体区域 -->
+        <div class="main-content">
+            <!-- 左侧时间周期选择 -->
+            <aside class="sidebar">
+                <!-- 导航按钮 -->
+                <div class="nav-buttons">
+                    <a href="/" class="nav-btn active">原始K线</a>
+                    <a href="/structure" class="nav-btn">结构K线</a>
+                </div>
+                
+                <div class="sidebar-scroll">
+                    <div class="interval-title">时间周期</div>
+                    <div class="interval-list">
+                        <button class="interval-btn active" data-interval="1m">1分钟</button>
+                        <button class="interval-btn" data-interval="5m">5分钟</button>
+                        <button class="interval-btn" data-interval="15m">15分钟</button>
+                        <button class="interval-btn" data-interval="1h">1小时</button>
+                        <button class="interval-btn" data-interval="4h">4小时</button>
+                        <button class="interval-btn" data-interval="1d">日线</button>
+                    </div>
+                    
+                    <!-- 回测面板 -->
+                    <div class="backtest-panel">
+                        <div class="backtest-header" id="backtest-toggle">
+                            <span class="backtest-title">📊 回测</span>
+                            <span class="backtest-arrow" id="backtest-arrow">▶</span>
+                        </div>
+                        <div class="backtest-body" id="backtest-body">
+                            <!-- 参数配置 -->
+                            <div class="backtest-params">
+                                <!-- 策略参数区 -->
+                                <div class="param-section-label">🎯 策略</div>
+                                <div class="param-row">
+                                    <span class="param-label">模式</span>
+                                    <select class="param-input" id="bt-mode">
+                                        <option value="long">只做多</option>
+                                        <option value="short">只做空</option>
+                                        <option value="both" selected>双向</option>
+                                    </select>
+                                </div>
+                                <div class="param-row">
+                                    <span class="param-label">止损%</span>
+                                    <input class="param-input" id="bt-stoploss" type="text" value="2.0">
+                                </div>
+                                <div class="param-row">
+                                    <span class="param-label">止盈%</span>
+                                    <input class="param-input" id="bt-takeprofit" type="text" value="5.0">
+                                </div>
+                                <div class="param-row">
+                                    <span class="param-label">止盈止损</span>
+                                    <label class="switch-label">
+                                        <input class="param-input switch-input" id="bt-use-stop-profit" type="checkbox" checked>
+                                        <span class="switch-slider"></span>
+                                    </label>
+                                </div>
+                                <div class="param-row">
+                                    <span class="param-label">费率%</span>
+                                    <input class="param-input" id="bt-fee" type="text" value="0.05">
+                                </div>
+                                
+                                <!-- 资金管理参数区 -->
+                                <div class="param-section-label">💰 资金管理</div>
+                                <div class="param-row">
+                                    <span class="param-label">模式</span>
+                                    <select class="param-input" id="bt-pos-mode">
+                                        <option value="percent">百分比</option>
+                                        <option value="fixed">固定金额</option>
+                                    </select>
+                                </div>
+                                <div class="param-row" id="bt-percent-row">
+                                    <span class="param-label">每笔%</span>
+                                    <input class="param-input" id="bt-pos-percent" type="text" value="20">
+                                </div>
+                                <div class="param-row" id="bt-fixed-row" style="display:none;">
+                                    <span class="param-label">金额</span>
+                                    <input class="param-input" id="bt-pos-fixed" type="text" value="1000">
+                                </div>
+                                <div class="param-row">
+                                    <span class="param-label">最大持仓</span>
+                                    <input class="param-input" id="bt-max-pos" type="text" value="3">
+                                </div>
+                                
+                                <!-- 常规参数 -->
+                                <div class="param-section-label">📅 回测范围</div>
+                                <div class="param-row">
+                                    <span class="param-label">资金</span>
+                                    <input class="param-input" id="bt-capital" type="text" value="10000">
+                                </div>
+                                <div class="param-row">
+                                    <span class="param-label">开始</span>
+                                    <input class="param-input" id="bt-start-date" type="date">
+                                </div>
+                                <div class="param-row">
+                                    <span class="param-label">结束</span>
+                                    <input class="param-input" id="bt-end-date" type="date">
+                                </div>
+                                <button class="bt-run-btn" id="bt-run">▶ 开始回测</button>
+                            </div>
+                            <!-- 回测结果 -->
+                            <div class="backtest-result" id="backtest-result" style="display:none;">
+                                <div class="result-row">
+                                    <span class="result-label">交易</span>
+                                    <span class="result-value" id="bt-trades">--</span>
+                                </div>
+                                <div class="result-row">
+                                    <span class="result-label">胜率</span>
+                                    <span class="result-value" id="bt-winrate">--</span>
+                                </div>
+                                <div class="result-row">
+                                    <span class="result-label">收益</span>
+                                    <span class="result-value" id="bt-return">--</span>
+                                </div>
+                                <div class="result-row">
+                                    <span class="result-label">回撤</span>
+                                    <span class="result-value" id="bt-drawdown">--</span>
+                                </div>
+                                <button class="bt-detail-btn" id="bt-detail-btn" style="display:none;">📋 查看交易明细</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="data-info">
+                    <div class="info-title">数据统计</div>
+                    <div id="data-stats">加载中...</div>
+                </div>
+                
+            </aside>
+            
+            <!-- K线图区域 -->
+            <main class="chart-area">
+                <div id="chart-container"></div>
+            </main>
+        </div>
+        
+        <!-- 底部状态栏 -->
+        <footer class="footer">
+            <span id="status">✔ 就绪</span>
+            <span id="data-time">--</span>
+        </footer>
+    </div>
+    
+    <!-- 交易明细弹窗 -->
+    <div class="modal-overlay" id="modal-overlay" style="display:none;">
+        <div class="modal-panel" id="modal-panel">
+            <div class="modal-header">
+                <span class="modal-title">📋 交易明细</span>
+                <span class="modal-close" id="modal-close">✕</span>
+            </div>
+            <div class="modal-body">
+                <table class="trade-table">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>方向</th>
+                            <th>开仓时间</th>
+                            <th>平仓时间</th>
+                            <th>开仓价</th>
+                            <th>平仓价</th>
+                            <th>已实现盈亏</th>
+                            <th>手续费</th>
+                            <th>盈亏%</th>
+                            <th>原因</th>
+                        </tr>
+                    </thead>
+                    <tbody id="trade-table-body"></tbody>
+                </table>
+                <div style="display:flex; gap:6px; margin:8px auto; width:90%;">
+                    <button class="bt-detail-btn" id="bt-equity-btn" style="flex:1;">📈 资产曲线</button>
+                    <select class="param-input" id="bt-export-select" style="flex:0.6; background:#1a1a2e; border:1px solid #3a3a5c; color:#e0e0e0; padding:4px; border-radius:3px; font-size:10px; cursor:pointer;">
+                        <option value="">📥 导出为...</option>
+                        <option value="csv">CSV 格式</option>
+                        <option value="xlsx">XLSX 格式</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="/static/js/utils/validators.js"></script>
+    <script>const DEFAULT_LIMIT = {{ config.DEFAULT_LIMIT }};</script>
+    <script src="/static/js/chart.js"></script>
+</body>
+</html>

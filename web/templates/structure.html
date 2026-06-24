@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ETHUSDT 永续 - 结构K线</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <script src="https://unpkg.com/lightweight-charts@4.1.0/dist/lightweight-charts.standalone.production.js"></script>
+</head>
+<body>
+    <div class="container">
+        <!-- 顶部标题栏 -->
+        <header class="header">
+            <div class="symbol-info">
+                <span class="symbol-name">ETHUSDT</span>
+                <span class="data-source-tag">结构K线</span>
+                <div class="price-container">
+                    <span class="price" id="current-price">--</span>
+                    <span class="change" id="price-change">
+                        <span class="change-indicator"></span>
+                        <span id="price-change-text">--</span>
+                    </span>
+                </div>
+            </div>
+            <!-- OHLC 信息显示 -->
+            <div class="ohlc-info" id="ohlc-info">
+                <span class="ohlc-item"><b>时间:</b> <span id="ohlc-time">--</span></span>
+                <span class="ohlc-item"><b>O:</b> <span id="ohlc-open">--</span></span>
+                <span class="ohlc-item"><b>H:</b> <span id="ohlc-high">--</span></span>
+                <span class="ohlc-item"><b>L:</b> <span id="ohlc-low">--</span></span>
+                <span class="ohlc-item"><b>C:</b> <span id="ohlc-close">--</span></span>
+                <span class="ohlc-item"><b>Vol:</b> <span id="ohlc-volume">--</span></span>
+                <span class="ohlc-item"><b>合并:</b> <span id="ohlc-source-count">--</span></span>
+            </div>
+        </header>
+        
+        <!-- 主体区域 -->
+        <div class="main-content">
+            <!-- 左侧时间周期选择 -->
+            <aside class="sidebar">
+                <!-- 导航按钮 -->
+                <div class="nav-buttons">
+                    <a href="/" class="nav-btn">原始K线</a>
+                    <a href="/structure" class="nav-btn active">结构K线</a>
+                </div>
+                
+                <div class="interval-title">时间周期</div>
+                <div class="interval-list">
+                    <button class="interval-btn active" data-interval="1m">1分钟</button>
+                    <button class="interval-btn" data-interval="5m">5分钟</button>
+                    <button class="interval-btn" data-interval="15m">15分钟</button>
+                    <button class="interval-btn" data-interval="1h">1小时</button>
+                    <button class="interval-btn" data-interval="4h">4小时</button>
+                    <button class="interval-btn" data-interval="1d">日线</button>
+                </div>
+                <div class="data-info">
+                    <div class="info-title">数据统计</div>
+                    <div id="data-stats">加载中...</div>
+                </div>
+                
+                <!-- 原始K线叠加开关 -->
+                <div class="profile-toggle">
+                    <button class="toggle-btn" id="overlay-btn">显示原始K线</button>
+                </div>
+            </aside>
+            
+            <!-- K线图区域 -->
+            <main class="chart-area">
+                <div id="chart-container"></div>
+            </main>
+        </div>
+        
+        <!-- 底部状态栏 -->
+        <footer class="footer">
+            <span class="data-source-hint">✦ 标准化K线（包含关系处理）</span>
+            <span id="status">✔ 就绪</span>
+            <span id="data-time">--</span>
+        </footer>
+    </div>
+    
+    <script>const DEFAULT_LIMIT = {{ config.DEFAULT_LIMIT }};</script>
+    <script src="/static/js/structure_chart.js"></script>
+</body>
+</html>
