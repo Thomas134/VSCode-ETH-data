@@ -130,7 +130,14 @@ def get_kline():
             """
             cursor.execute(query, (limit,))
         
-        rows = cursor.fetchall()
+        # 使用 fetchmany 分批读取
+        rows = []
+        batch_size = 1000
+        while True:
+            batch = cursor.fetchmany(batch_size)
+            if not batch:
+                break
+            rows.extend(batch)
         
         # ── 从结构表读取分型区间 ──
         fractal_ranges = []
@@ -150,7 +157,14 @@ def get_kline():
                 ORDER BY start_time ASC
                 """, (min_time, max_time))
                 
-                all_std_rows = struct_cursor.fetchall()
+                # 使用 fetchmany 分批读取
+                all_std_rows = []
+                batch_size = 1000
+                while True:
+                    batch = struct_cursor.fetchmany(batch_size)
+                    if not batch:
+                        break
+                    all_std_rows.extend(batch)
                 
                 # 从所有标准K线中筛选出分型行，同时记录每个分型的下一行索引
                 for idx, sr in enumerate(all_std_rows):
@@ -485,7 +499,15 @@ def get_fractals():
         LIMIT ?
         """, params + [limit + 1])
 
-        all_rows = cursor.fetchall()
+        # 使用 fetchmany 分批读取
+        all_rows = []
+        batch_size = 5000
+        while True:
+            batch = cursor.fetchmany(batch_size)
+            if not batch:
+                break
+            all_rows.extend(batch)
+        
         struct_conn.close()
 
         if not all_rows:
@@ -542,14 +564,19 @@ def get_stats():
         sql = " UNION ALL ".join(parts)
         cursor.execute(sql)
         
+        # 使用 fetchmany 分批读取统计结果
         stats = {}
-        for row in cursor.fetchall():
-            interval, count, min_time, max_time = row
-            stats[interval] = {
-                "count": count,
-                "min_time": min_time,
-                "max_time": max_time,
-            }
+        while True:
+            batch = cursor.fetchmany(10)  # 只有6个时间级别，一次取10个足够
+            if not batch:
+                break
+            for row in batch:
+                interval, count, min_time, max_time = row
+                stats[interval] = {
+                    "count": count,
+                    "min_time": min_time,
+                    "max_time": max_time,
+                }
         
         conn.close()
         return jsonify(stats)

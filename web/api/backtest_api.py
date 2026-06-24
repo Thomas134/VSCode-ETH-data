@@ -60,7 +60,20 @@ def _load_kline_with_signals(interval, start_date, end_date):
     WHERE {where}
     ORDER BY open_time ASC
     """, params)
-    kline_rows = cursor.fetchall()
+    
+    # 使用 fetchmany 分批读取，降低内存占用
+    kline_rows = []
+    batch_size = 10000
+    batch_num = 0
+    while True:
+        batch = cursor.fetchmany(batch_size)
+        if not batch:
+            break
+        kline_rows.extend(batch)
+        batch_num += 1
+        if batch_num % 10 == 0:
+            print(f"[K线加载] 已加载 {len(kline_rows):,} 条...")
+    
     conn.close()
 
     if not kline_rows:
@@ -79,7 +92,16 @@ def _load_kline_with_signals(interval, start_date, end_date):
     WHERE start_time >= ? AND start_time < ?
     ORDER BY start_time ASC
     """, (min_time, max_time))
-    all_std_rows = cursor.fetchall()
+    
+    # 使用 fetchmany 分批读取分型数据
+    all_std_rows = []
+    batch_size = 5000
+    while True:
+        batch = cursor.fetchmany(batch_size)
+        if not batch:
+            break
+        all_std_rows.extend(batch)
+    
     conn.close()
 
     # 构建 trigger_map: confirm_time(秒) → signal(-1或1)
