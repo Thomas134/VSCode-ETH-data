@@ -1,6 +1,5 @@
 # 数据库文件（太大，不上传）
 *.db
-bybit_eth_data/data/processed/
 
 # Python 缓存
 venv/
