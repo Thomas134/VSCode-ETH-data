@@ -18,4 +18,4 @@ RUN curl -L -o /app/bybit_eth_data/data/processed/eth_perpetual.db \
 
 EXPOSE 8080
 
-CMD cd web && gunicorn app:app --bind 0.0.0.0:8080 --workers 2 --timeout 120
+CMD cd web && gunicorn app:app --bind 0.0.0.0:8080 --workers 1 --timeout 120
