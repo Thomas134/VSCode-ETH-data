@@ -597,9 +597,85 @@ function clearFractalRegions() {
 
 let backtestResult = null;  // 保存回测结果
 
-// 显示回测结果
+// 更新缓存状态指示灯
+function updateCacheStatus(status) {
+    const el = document.getElementById('cache-status');
+    if (!el) return;
+    
+    // status: 'hit'(命中-绿), 'miss'(未命中-黄), 'offline'(关闭-红)
+    el.className = 'cache-status ' + status;
+    const titles = {
+        'hit': '缓存命中',
+        'miss': '缓存未命中',
+        'offline': '缓存已禁用'
+    };
+    el.title = titles[status] || '缓存状态';
+}
+
+// 获取当前回测参数（用于缓存key）
+function getBacktestParams() {
+    return {
+        interval: currentInterval,
+        start_date: document.getElementById('bt-start-date').value || '',
+        end_date: document.getElementById('bt-end-date').value || '',
+        mode: document.getElementById('bt-mode').value,
+        stop_loss_pct: parseFloat(document.getElementById('bt-stoploss').value),
+        take_profit_pct: parseFloat(document.getElementById('bt-takeprofit').value),
+        initial_capital: parseFloat(document.getElementById('bt-capital').value),
+        fee_rate: parseFloat(document.getElementById('bt-fee').value),
+        position_mode: document.getElementById('bt-pos-mode').value,
+        percent_per_trade: parseFloat(document.getElementById('bt-pos-percent').value),
+        fixed_amount: parseFloat(document.getElementById('bt-pos-fixed').value),
+        max_positions: parseInt(document.getElementById('bt-max-pos').value),
+        use_stop_profit: document.getElementById('bt-use-stop-profit').checked,
+    };
+}
+
+// 清除回测缓存
+async function clearBacktestCache(clearAll = false) {
+    try {
+        const params = clearAll ? {} : { params: getBacktestParams() };
+        const response = await fetch('/api/backtest/cache/clear', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(params)
+        });
+        
+        const result = await response.json();
+        if (result.error) {
+            setStatus(`❌ 清除缓存失败: ${result.error}`);
+        } else {
+            setStatus(`✅ ${result.message}`);
+            updateCacheStatus('miss');
+        }
+    } catch (error) {
+        setStatus(`❌ 清除缓存失败: ${error.message}`);
+    }
+}
+
+// 获取缓存统计
+async function loadCacheStats() {
+    try {
+        const response = await fetch('/api/backtest/cache/stats');
+        const stats = await response.json();
+        if (!stats.error) {
+            console.log('[Cache Stats]', stats);
+            // 如果有有效缓存条目，显示绿色
+            if (stats.valid_entries > 0) {
+                updateCacheStatus('hit');
+            } else {
+                updateCacheStatus('miss');
+            }
+        }
+    } catch (e) {
+        console.error('获取缓存统计失败:', e);
+    }
+}
+
+// 显示回测结果（立即执行，不处理交易明细）
 function displayBacktestResult(result) {
-    backtestResult = result;
+    backtestResult = backtestResult || {};
+    Object.assign(backtestResult, result);
 
     const resultDiv = document.getElementById('backtest-result');
     resultDiv.style.display = 'block';
@@ -615,13 +691,18 @@ function displayBacktestResult(result) {
     ddEl.textContent = result.maxDdPct.toFixed(2) + '%';
     ddEl.className = 'result-value negative';
 
-    renderTradeList(result.trades);
-
-    setStatus(`回测完成: ${result.totalTrades}笔交易, 收益率${result.totalReturn >= 0 ? '+' : ''}${result.totalReturn.toFixed(2)}%`);
+    // 只显示按钮，不处理交易数据
+    const detailBtn = document.getElementById('bt-detail-btn');
+    if (result.totalTrades > 0) {
+        detailBtn.style.display = 'block';
+    } else {
+        detailBtn.style.display = 'none';
+    }
 }
 
 async function runBacktest() {
     // 读取参数
+    const skipCache = document.getElementById('bt-skip-cache').checked;
     const params = {
         interval: currentInterval,
         start_date: document.getElementById('bt-start-date').value || '',
@@ -636,11 +717,18 @@ async function runBacktest() {
         fixed_amount: parseFloat(document.getElementById('bt-pos-fixed').value),
         max_positions: parseInt(document.getElementById('bt-max-pos').value),
         use_stop_profit: document.getElementById('bt-use-stop-profit').checked,
+        _skip_cache: skipCache,
     };
+
+    // 更新缓存状态指示
+    if (skipCache) {
+        updateCacheStatus('offline');
+    }
 
     setStatus('⏳ 正在服务端执行全量回测...');
 
     try {
+        const startTime = performance.now();
         const response = await fetch('/api/backtest', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -648,81 +736,88 @@ async function runBacktest() {
         });
 
         const result = await response.json();
+        const fetchTime = performance.now() - startTime;
 
         if (result.error) {
             setStatus(`❌ ${result.error}`);
             return;
         }
 
-        // 展示结果（将后端 snake_case 字段映射为前端 camelCase 格式）
-        const mappedTrades = (result.trades || []).map(t => ({
-            direction: t.direction,
-            entryTime: t.entry_time,
-            exitTime: t.exit_time,
-            entryPrice: t.entry_price,
-            exitPrice: t.exit_price,
-            amount: t.amount,
-            pnl: t.pnl,
-            pnlPct: t.pnl_pct,
-            fee: t.fee,
-            reason: t.reason,
-        }));
+        // 检查缓存命中状态
+        if (result._cache_hit) {
+            updateCacheStatus('hit');
+            console.log(`[Backtest] 缓存命中，缓存时间: ${new Date(result._cached_at * 1000).toLocaleString()}`);
+        } else if (!skipCache) {
+            updateCacheStatus('miss');
+        }
 
+        // 【关键优化】立即显示统计结果和状态，不等待交易数据处理
+        const cacheInfo = result._cache_hit ? ' [缓存]' : '';
+        setStatus(
+            `✅ 回测完成${cacheInfo}: ${result.summary.total_trades}笔交易, ` +
+            `收益${result.summary.total_return >= 0 ? '+' : ''}${result.summary.total_return}% ` +
+            `(${fetchTime.toFixed(0)}ms)`
+        );
+
+        // 立即显示统计数字（不处理交易明细）
         displayBacktestResult({
-            trades: mappedTrades,
-            equityCurve: result.equity_curve,
-            capital: result.summary.final_capital,
             totalTrades: result.summary.total_trades,
             winRate: result.summary.win_rate,
             totalReturn: result.summary.total_return,
             maxDdPct: result.summary.max_drawdown,
         });
 
-        setStatus(
-            `✅ 回测完成: ${result.summary.total_trades}笔交易, ` +
-            `${result.kline_count.toLocaleString()}根K线, ` +
-            `收益${result.summary.total_return >= 0 ? '+' : ''}${result.summary.total_return}%`
-        );
+        // 【关键优化】延迟处理交易数据，不阻塞UI
+        setTimeout(() => {
+            // 转换交易数据（snake_case -> camelCase）
+            const mappedTrades = (result.trades || []).map(t => ({
+                direction: t.direction,
+                entryTime: t.entry_time,
+                exitTime: t.exit_time,
+                entryPrice: t.entry_price,
+                exitPrice: t.exit_price,
+                amount: t.amount,
+                pnl: t.pnl,
+                pnlPct: t.pnl_pct,
+                fee: t.fee,
+                reason: t.reason,
+            }));
+
+            // 保存完整结果
+            backtestResult = {
+                ...backtestResult,
+                trades: mappedTrades,
+                equityCurve: result.equity_curve,
+                capital: result.summary.final_capital,
+                cacheHit: result._cache_hit || false,
+            };
+
+            console.log(`[Backtest] 交易数据处理完成: ${mappedTrades.length}笔交易`);
+        }, 0);
 
     } catch (error) {
         setStatus(`❌ 回测失败: ${error.message}`);
     }
 }
 
-// 渲染交易明细（存入全局变量，弹窗时使用）
-function renderTradeList(trades) {
-    backtestResult = backtestResult || {};
-    backtestResult.trades = trades;
-    
-    // 如果有交易，显示查看明细按钮
-    const detailBtn = document.getElementById('bt-detail-btn');
-    if (trades.length > 0) {
-        detailBtn.style.display = 'block';
-    } else {
-        detailBtn.style.display = 'none';
-    }
-}
-
-// 打开交易明细弹窗
+// 打开交易明细弹窗（分批渲染优化版）
 function openTradeDetail() {
     const trades = backtestResult && backtestResult.trades;
     if (!trades || trades.length === 0) return;
     
     const tbody = document.getElementById('trade-table-body');
-    tbody.innerHTML = '';
+    const BATCH_SIZE = 50; // 每帧渲染50行
     
-    for (let i = 0; i < trades.length; i++) {
-        const t = trades[i];
+    // 先显示弹窗和加载提示
+    tbody.innerHTML = '<tr><td colspan="10" style="text-align:center;color:#888;padding:20px;">加载中... (0/' + trades.length + ')</td></tr>';
+    document.getElementById('modal-overlay').style.display = 'flex';
+    
+    let index = 0;
+    
+    // 创建单行数据
+    function createTradeRow(t, i) {
         const tr = document.createElement('tr');
         
-        const idxTd = document.createElement('td');
-        idxTd.textContent = i + 1;
-        
-        const dirTd = document.createElement('td');
-        dirTd.className = t.direction === '多' ? 'trade-dir-long' : 'trade-dir-short';
-        dirTd.textContent = t.direction;
-
-        // 时间戳转可读时间
         const entryTimeStr = t.entryTime ? new Date(t.entryTime * 1000).toLocaleString('zh-CN', {
             year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit'
         }) : '--';
@@ -730,59 +825,51 @@ function openTradeDetail() {
             year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit'
         }) : '--';
         
-        const entryTimeTd = document.createElement('td');
-        entryTimeTd.textContent = entryTimeStr;
-        entryTimeTd.style.fontSize = '10px';
-        entryTimeTd.style.color = '#aaaacc';
-        
-        const exitTimeTd = document.createElement('td');
-        exitTimeTd.textContent = exitTimeStr;
-        exitTimeTd.style.fontSize = '10px';
-        exitTimeTd.style.color = '#aaaacc';
-        
-        const entryTd = document.createElement('td');
-        entryTd.textContent = t.entryPrice != null ? t.entryPrice.toFixed(2) : '--';
-        
-        const exitTd = document.createElement('td');
-        exitTd.textContent = t.exitPrice != null ? t.exitPrice.toFixed(2) : '--';
-        
-        // 手续费
-        const feeTd = document.createElement('td');
-        const feeVal = t.fee != null ? t.fee : 0;
-        feeTd.textContent = feeVal.toFixed(2);
-        feeTd.style.color = '#ffaa00';
-        
-        const pnlTd = document.createElement('td');
         const pnlPctVal = t.pnlPct != null ? t.pnlPct : 0;
-        pnlTd.className = pnlPctVal >= 0 ? 'trade-pnl-positive' : 'trade-pnl-negative';
-        pnlTd.textContent = (pnlPctVal >= 0 ? '+' : '') + pnlPctVal.toFixed(2) + '%';
-
-        // 已实现盈亏（金额）
-        const pnlAmountTd = document.createElement('td');
         const pnlVal = t.pnl != null ? t.pnl : 0;
-        pnlAmountTd.className = pnlVal >= 0 ? 'trade-pnl-positive' : 'trade-pnl-negative';
-        pnlAmountTd.textContent = (pnlVal >= 0 ? '+' : '') + pnlVal.toFixed(2);
+        const feeVal = t.fee != null ? t.fee : 0;
         
-        const reasonTd = document.createElement('td');
-        reasonTd.textContent = t.reason;
-        reasonTd.style.fontFamily = '"Microsoft YaHei", sans-serif';
-        reasonTd.style.fontSize = '10px';
-        
-        tr.appendChild(idxTd);
-        tr.appendChild(dirTd);
-        tr.appendChild(entryTimeTd);
-        tr.appendChild(exitTimeTd);
-        tr.appendChild(entryTd);
-        tr.appendChild(exitTd);
-        tr.appendChild(pnlAmountTd);
-        tr.appendChild(feeTd);
-        tr.appendChild(pnlTd);
-        tr.appendChild(reasonTd);
-        tbody.appendChild(tr);
+        tr.innerHTML = `
+            <td>${i + 1}</td>
+            <td class="${t.direction === '多' ? 'trade-dir-long' : 'trade-dir-short'}">${t.direction}</td>
+            <td style="font-size:10px;color:#aaaacc;">${entryTimeStr}</td>
+            <td style="font-size:10px;color:#aaaacc;">${exitTimeStr}</td>
+            <td>${t.entryPrice != null ? t.entryPrice.toFixed(2) : '--'}</td>
+            <td>${t.exitPrice != null ? t.exitPrice.toFixed(2) : '--'}</td>
+            <td class="${pnlVal >= 0 ? 'trade-pnl-positive' : 'trade-pnl-negative'}">${(pnlVal >= 0 ? '+' : '') + pnlVal.toFixed(2)}</td>
+            <td style="color:#ffaa00;">${feeVal.toFixed(2)}</td>
+            <td class="${pnlPctVal >= 0 ? 'trade-pnl-positive' : 'trade-pnl-negative'}">${(pnlPctVal >= 0 ? '+' : '') + pnlPctVal.toFixed(2)}%</td>
+            <td style="font-family:Microsoft YaHei,sans-serif;font-size:10px;">${t.reason}</td>
+        `;
+        return tr;
     }
     
-    // 显示弹窗
-    document.getElementById('modal-overlay').style.display = 'flex';
+    // 分批渲染
+    function renderBatch() {
+        // 首次渲染时清空加载提示
+        if (index === 0) tbody.innerHTML = '';
+        
+        const fragment = document.createDocumentFragment();
+        const end = Math.min(index + BATCH_SIZE, trades.length);
+        
+        for (; index < end; index++) {
+            fragment.appendChild(createTradeRow(trades[index], index));
+        }
+        
+        tbody.appendChild(fragment);
+        
+        // 更新加载进度
+        if (index < trades.length) {
+            const progress = Math.round((index / trades.length) * 100);
+            // 继续下一帧
+            requestAnimationFrame(renderBatch);
+        } else {
+            console.log(`[TradeDetail] 渲染完成: ${trades.length}笔交易`);
+        }
+    }
+    
+    // 开始分批渲染
+    requestAnimationFrame(renderBatch);
 }
 
 // 显示资产曲线弹窗
@@ -1073,6 +1160,26 @@ function initBacktest() {
         }
         this.value = '';  // 重置为占位选项
     });
+    
+    // 缓存控制按钮
+    document.getElementById('bt-clear-cache').addEventListener('click', () => {
+        clearBacktestCache(false);
+    });
+    document.getElementById('bt-clear-all-cache').addEventListener('click', () => {
+        clearBacktestCache(true);
+    });
+    
+    // 跳过缓存切换时更新状态
+    document.getElementById('bt-skip-cache').addEventListener('change', function() {
+        if (this.checked) {
+            updateCacheStatus('offline');
+        } else {
+            loadCacheStats();
+        }
+    });
+    
+    // 初始化时加载缓存统计
+    loadCacheStats();
     
     // 关闭弹窗
     document.getElementById('modal-close').addEventListener('click', () => {

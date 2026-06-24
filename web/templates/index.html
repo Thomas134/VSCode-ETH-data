@@ -129,6 +129,24 @@
                                     <span class="param-label">结束</span>
                                     <input class="param-input" id="bt-end-date" type="date">
                                 </div>
+                                
+                                <!-- 缓存控制区 -->
+                                <div class="param-section-label">
+                                    <span>⚡ 缓存控制</span>
+                                    <span class="cache-status" id="cache-status" title="缓存状态">●</span>
+                                </div>
+                                <div class="param-row">
+                                    <span class="param-label">跳过缓存</span>
+                                    <label class="switch-label">
+                                        <input class="param-input switch-input" id="bt-skip-cache" type="checkbox">
+                                        <span class="switch-slider"></span>
+                                    </label>
+                                </div>
+                                <div class="param-row cache-actions">
+                                    <button class="cache-btn" id="bt-clear-cache" title="清除当前参数缓存">清除</button>
+                                    <button class="cache-btn" id="bt-clear-all-cache" title="清除所有缓存">全部清除</button>
+                                </div>
+                                
                                 <button class="bt-run-btn" id="bt-run">▶ 开始回测</button>
                             </div>
                             <!-- 回测结果 -->

@@ -8,6 +8,7 @@ from .config import (
     DB_PATH, STRUCTURE_DB,
     KLINE_TABLE_MAP, FRACTAL_TABLE_MAP, INTERVAL_MS
 )
+from .cache_manager import backtest_cache
 
 backtest_bp = Blueprint('backtest', __name__)
 
@@ -40,7 +41,7 @@ def _load_kline_with_signals(interval, start_date, end_date):
         end_ms = int(dt.timestamp() * 1000)
 
     # 1. 加载K线数据
-    conn = sqlite3.connect(f"file:{DB_PATH}?mode=ro", uri=True)
+    conn = sqlite3.connect(f"file:{DB_PATH.resolve().as_posix()}?mode=ro", uri=True)
     cursor = conn.cursor()
 
     conditions = ["open_time IS NOT NULL"]
@@ -69,7 +70,7 @@ def _load_kline_with_signals(interval, start_date, end_date):
     min_time = kline_rows[0][0]
     max_time = kline_rows[-1][0]
 
-    conn = sqlite3.connect(f"file:{STRUCTURE_DB}?mode=ro", uri=True)
+    conn = sqlite3.connect(f"file:{STRUCTURE_DB.resolve().as_posix()}?mode=ro", uri=True)
     cursor = conn.cursor()
 
     cursor.execute(f"""
@@ -112,10 +113,45 @@ def _load_kline_with_signals(interval, start_date, end_date):
     return kline_data
 
 
+def _get_cache_key_params(params, kline_data):
+    """
+    生成用于缓存的参数字典
+    
+    包含：
+    1. 所有回测参数
+    2. 数据指纹（避免数据更新后仍使用旧缓存）
+    """
+    # 数据指纹：基于数据条数和首尾时间戳
+    data_fingerprint = None
+    if kline_data and len(kline_data) > 0:
+        data_fingerprint = {
+            "count": len(kline_data),
+            "first_time": kline_data[0]["time"] if isinstance(kline_data[0], dict) else kline_data[0][0],
+            "last_time": kline_data[-1]["time"] if isinstance(kline_data[-1], dict) else kline_data[-1][0],
+        }
+    
+    return {
+        "interval": params.get("interval"),
+        "start_date": params.get("start_date"),
+        "end_date": params.get("end_date"),
+        "mode": params.get("mode"),
+        "stop_loss_pct": params.get("stop_loss_pct"),
+        "take_profit_pct": params.get("take_profit_pct"),
+        "initial_capital": params.get("initial_capital"),
+        "fee_rate": params.get("fee_rate"),
+        "position_mode": params.get("position_mode"),
+        "percent_per_trade": params.get("percent_per_trade"),
+        "fixed_amount": params.get("fixed_amount"),
+        "max_positions": params.get("max_positions"),
+        "use_stop_profit": params.get("use_stop_profit"),
+        "data_fingerprint": data_fingerprint,
+    }
+
+
 @backtest_bp.route('/api/backtest', methods=['POST'])
 def run_backtest():
     """
-    全量回测入口 - 在Flask进程内直接执行
+    全量回测入口 - 在Flask进程内直接执行（支持缓存）
     """
     try:
         params = request.get_json()
@@ -157,6 +193,17 @@ def run_backtest():
         if len(kline_data) < 10:
             return jsonify({"error": f"K线数据不足 ({len(kline_data)} 根)"}), 400
 
+        # 生成缓存key参数
+        cache_params = _get_cache_key_params(params, kline_data)
+        
+        # 检查缓存（除非明确要求跳过缓存）
+        skip_cache = params.get("_skip_cache", False)
+        if not skip_cache:
+            cached_result = backtest_cache.get(cache_params)
+            if cached_result:
+                print(f"[Backtest] 缓存命中，直接返回结果")
+                return jsonify(cached_result)
+
         # 在Flask进程内直接执行回测
         engine_path = Path(__file__).resolve().parents[2] / "backtest" / "engine.py"
         import importlib.util
@@ -184,8 +231,45 @@ def run_backtest():
         if "error" in result:
             return jsonify(result), 400
 
+        # 保存结果到缓存
+        if not skip_cache:
+            backtest_cache.set(cache_params, result)
+            print(f"[Backtest] 结果已缓存")
+
         return jsonify(result)
 
     except Exception as e:
         print(f"[Backtest] 错误: {e}")
+        return jsonify({"error": str(e)}), 500
+
+
+@backtest_bp.route('/api/backtest/cache/clear', methods=['POST'])
+def clear_backtest_cache():
+    """
+    清除回测缓存
+    
+    请求体可选参数:
+        params: 指定参数则只清除该参数的缓存，不传则清除所有
+    """
+    try:
+        data = request.get_json() or {}
+        target_params = data.get("params")
+        
+        if target_params:
+            backtest_cache.clear(target_params)
+            return jsonify({"status": "ok", "message": "指定参数的缓存已清除"})
+        else:
+            backtest_cache.clear_all()
+            return jsonify({"status": "ok", "message": "所有回测缓存已清除"})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+@backtest_bp.route('/api/backtest/cache/stats', methods=['GET'])
+def get_backtest_cache_stats():
+    """获取回测缓存统计信息"""
+    try:
+        stats = backtest_cache.get_stats()
+        return jsonify(stats)
+    except Exception as e:
         return jsonify({"error": str(e)}), 500

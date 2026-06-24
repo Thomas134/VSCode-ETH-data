@@ -725,6 +725,38 @@ select.param-input {
   padding-top: 0;
 }
 
+/* 缓存控制按钮 */
+.cache-actions {
+  display: flex;
+  gap: 6px;
+}
+.cache-btn {
+  flex: 1;
+  padding: 4px 8px;
+  font-size: 10px;
+  background: #2a2a4a;
+  border: 1px solid #3a3a5c;
+  border-radius: 3px;
+  color: #a0a0b8;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.cache-btn:hover {
+  background: #3a3a5c;
+  color: #e0e0e0;
+}
+.cache-status {
+  font-size: 10px;
+  color: #0ecb81;
+  cursor: help;
+}
+.cache-status.miss {
+  color: #f0b90b;
+}
+.cache-status.offline {
+  color: #f6465d;
+}
+
 /* 运行回测按钮 (Bybit 风格) */
 .bt-run-btn {
   width: 100%;
