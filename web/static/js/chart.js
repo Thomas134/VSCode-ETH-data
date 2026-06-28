@@ -255,7 +255,6 @@ async function loadKlineData(interval, limit = DEFAULT_LIMIT) {
     // 重置分页状态
     allCandleData = [];
     allVolumeData = [];
-    allFractalData = [];
     earliestTime = null;
     clearFractalRegions();
     
