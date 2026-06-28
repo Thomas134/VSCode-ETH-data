@@ -60,7 +60,7 @@ class StreamingBacktestEngine:
         for idx, row in enumerate(self._iter_klines(interval, start_date, end_date)):
             total_rows = idx + 1
             current_time = row[0]
-            current_price = row[4]
+            current_price = row[1]
             
             if idx % equity_sample_interval == 0:
                 self._record_equity(current_price, current_time)
@@ -115,7 +115,7 @@ class StreamingBacktestEngine:
         where = " AND ".join(conditions)
         
         cursor.execute(f"""
-        SELECT open_time, open, high, low, close, volume
+        SELECT open_time, close
         FROM {table_name}
         WHERE {where}
         ORDER BY open_time ASC
@@ -123,12 +123,8 @@ class StreamingBacktestEngine:
         
         for row in cursor:
             yield (
-                int(row[0]) // 1000,
-                float(row[1]),
-                float(row[2]),
-                float(row[3]),
-                float(row[4]),
-                float(row[5])
+                int(row[0]) // 1000,   # time
+                float(row[1]),          # close
             )
         
         conn.close()
