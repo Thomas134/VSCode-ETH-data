@@ -596,6 +596,7 @@ function clearFractalRegions() {
 // ======================== 回测引擎（资金管理版） ========================
 
 let backtestResult = null;  // 保存回测结果
+let isBacktestRunning = false;  // 防止重复提交标志
 
 // 更新缓存状态指示灯
 function updateCacheStatus(status) {
@@ -701,33 +702,46 @@ function displayBacktestResult(result) {
 }
 
 async function runBacktest() {
-    // 读取参数
-    const skipCache = document.getElementById('bt-skip-cache').checked;
-    const params = {
-        interval: currentInterval,
-        start_date: document.getElementById('bt-start-date').value || '',
-        end_date: document.getElementById('bt-end-date').value || '',
-        mode: document.getElementById('bt-mode').value,
-        stop_loss_pct: parseFloat(document.getElementById('bt-stoploss').value),
-        take_profit_pct: parseFloat(document.getElementById('bt-takeprofit').value),
-        initial_capital: parseFloat(document.getElementById('bt-capital').value),
-        fee_rate: parseFloat(document.getElementById('bt-fee').value),
-        position_mode: document.getElementById('bt-pos-mode').value,
-        percent_per_trade: parseFloat(document.getElementById('bt-pos-percent').value),
-        fixed_amount: parseFloat(document.getElementById('bt-pos-fixed').value),
-        max_positions: parseInt(document.getElementById('bt-max-pos').value),
-        use_stop_profit: document.getElementById('bt-use-stop-profit').checked,
-        _skip_cache: skipCache,
-    };
-
-    // 更新缓存状态指示
-    if (skipCache) {
-        updateCacheStatus('offline');
+    // 防止重复点击 - 如果回测正在执行，直接返回
+    if (isBacktestRunning) {
+        setStatus('⏳ 回测正在执行中，请稍候...');
+        return;
     }
+    
+    // 设置执行标志并禁用按钮
+    isBacktestRunning = true;
+    const runBtn = document.getElementById('bt-run');
+    const originalBtnText = runBtn.textContent;
+    runBtn.disabled = true;
+    runBtn.textContent = '⏳ 回测中...';
+    
+    try {
+        // 读取参数
+        const skipCache = document.getElementById('bt-skip-cache').checked;
+        const params = {
+            interval: currentInterval,
+            start_date: document.getElementById('bt-start-date').value || '',
+            end_date: document.getElementById('bt-end-date').value || '',
+            mode: document.getElementById('bt-mode').value,
+            stop_loss_pct: parseFloat(document.getElementById('bt-stoploss').value),
+            take_profit_pct: parseFloat(document.getElementById('bt-takeprofit').value),
+            initial_capital: parseFloat(document.getElementById('bt-capital').value),
+            fee_rate: parseFloat(document.getElementById('bt-fee').value),
+            position_mode: document.getElementById('bt-pos-mode').value,
+            percent_per_trade: parseFloat(document.getElementById('bt-pos-percent').value),
+            fixed_amount: parseFloat(document.getElementById('bt-pos-fixed').value),
+            max_positions: parseInt(document.getElementById('bt-max-pos').value),
+            use_stop_profit: document.getElementById('bt-use-stop-profit').checked,
+            _skip_cache: skipCache,
+        };
+
+        // 更新缓存状态指示
+        if (skipCache) {
+            updateCacheStatus('offline');
+        }
 
     setStatus('⏳ 正在服务端执行全量回测...');
 
-    try {
         const startTime = performance.now();
         const response = await fetch('/api/backtest', {
             method: 'POST',
@@ -797,6 +811,11 @@ async function runBacktest() {
 
     } catch (error) {
         setStatus(`❌ 回测失败: ${error.message}`);
+    } finally {
+        // 恢复按钮状态
+        isBacktestRunning = false;
+        runBtn.disabled = false;
+        runBtn.textContent = originalBtnText;
     }
 }
 
