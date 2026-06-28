@@ -10,6 +10,7 @@ from .config import (
     DEFAULT_LIMIT
 )
 from .cache_manager import kline_cache
+from .json_profiler import JSONProfiler  # JSON性能测试（可随时注释掉）
 
 kline_bp = Blueprint('kline', __name__)
 
@@ -223,10 +224,11 @@ def get_kline():
         if before is None:
             kline_cache.set_fractals(interval, regions)
         
-        return jsonify({
+        # 测试JSON序列化性能（测试完可改回: return jsonify({...})）
+        return JSONProfiler.profile({
             "data": data,
             "fractal_regions": regions,
-        })
+        }, "kline")
         
     except Exception as e:
         return jsonify({"error": str(e)}), 500
