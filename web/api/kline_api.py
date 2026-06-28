@@ -14,14 +14,20 @@ from .cache_manager import kline_cache
 kline_bp = Blueprint('kline', __name__)
 
 def get_db_connection():
-    """获取只读数据库连接"""
+    """获取只读数据库连接（启用WAL模式优化并发）"""
     conn = sqlite3.connect(f"file:{DB_PATH}?mode=ro", uri=True)
+    conn.execute("PRAGMA journal_mode=WAL")
+    conn.execute("PRAGMA synchronous=NORMAL")
+    conn.execute("PRAGMA cache_size=10000")
     conn.row_factory = sqlite3.Row
     return conn
 
 def get_structure_connection():
-    """获取结构数据库连接"""
+    """获取结构数据库连接（启用WAL模式优化并发）"""
     conn = sqlite3.connect(f"file:{STRUCTURE_DB}?mode=ro", uri=True)
+    conn.execute("PRAGMA journal_mode=WAL")
+    conn.execute("PRAGMA synchronous=NORMAL")
+    conn.execute("PRAGMA cache_size=10000")
     conn.row_factory = sqlite3.Row
     return conn
 

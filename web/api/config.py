@@ -3,6 +3,31 @@
 # 所有API共享的配置统一放在这里，避免重复定义
 
 from pathlib import Path
+import sqlite3
+import threading
+
+# ── 数据库连接工厂（用完即关，避免内存泄漏） ──
+# 注意：虽然 connect() 有 50-100ms 开销，但回测算 3-5 秒，占比很小
+# 连接池会导致内存持续增长，所以采用"即用即关"模式
+
+def get_db_connection():
+    """
+    获取数据库连接（WAL模式优化）
+    每次新建连接，用完务必调用 conn.close()！
+    """
+    conn = sqlite3.connect(f"file:{DB_PATH}?mode=ro", uri=True)
+    conn.execute("PRAGMA journal_mode=WAL")
+    conn.execute("PRAGMA synchronous=NORMAL")
+    conn.execute("PRAGMA cache_size=5000")  # 减小到 20MB，避免内存过大
+    return conn
+
+def get_structure_connection():
+    """获取结构数据库连接（WAL模式优化）"""
+    conn = sqlite3.connect(f"file:{STRUCTURE_DB}?mode=ro", uri=True)
+    conn.execute("PRAGMA journal_mode=WAL")
+    conn.execute("PRAGMA synchronous=NORMAL")
+    conn.execute("PRAGMA cache_size=5000")  # 减小缓存
+    return conn
 
 # ── 项目根目录 ──
 # web/api/config.py → web → 项目根

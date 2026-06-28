@@ -7,7 +7,6 @@ from typing import Dict, Any, Generator, Tuple
 from pathlib import Path
 
 # 添加config路径
-import sys
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "api"))
 from config import DB_PATH, STRUCTURE_DB, KLINE_TABLE_MAP, FRACTAL_TABLE_MAP, INTERVAL_MS
 
@@ -101,7 +100,9 @@ class StreamingBacktestEngine:
             dt = datetime.datetime.strptime(end_date, "%Y-%m-%d")
             end_ms = int(dt.timestamp() * 1000)
         
-        conn = sqlite3.connect(f"file:{DB_PATH.resolve().as_posix()}?mode=ro", uri=True)
+        # 使用连接池复用连接（避免重复connect开销）
+        from api.config import get_db_connection
+        conn = get_db_connection()
         cursor = conn.cursor()
         
         conditions = ["open_time IS NOT NULL"]
@@ -127,7 +128,7 @@ class StreamingBacktestEngine:
                 float(row[1]),          # close
             )
         
-        conn.close()
+        conn.close()  # 关闭连接释放内存
     
     def _load_fractal_signals(self, interval: str, start_date: str, end_date: str) -> dict:
         """加载分型信号"""
@@ -145,7 +146,8 @@ class StreamingBacktestEngine:
             dt = datetime.datetime.strptime(end_date, "%Y-%m-%d")
             end_ms = int(dt.timestamp() * 1000)
         
-        conn = sqlite3.connect(f"file:{STRUCTURE_DB.resolve().as_posix()}?mode=ro", uri=True)
+        from api.config import get_structure_connection
+        conn = get_structure_connection()
         cursor = conn.cursor()
         
         # 获取所有行用于计算confirm_time
@@ -188,7 +190,7 @@ class StreamingBacktestEngine:
                 confirm_time_ms = end_time - interval_ms
                 trigger_map[confirm_time_ms // 1000] = label
         
-        conn.close()
+        conn.close()  # 关闭连接释放内存
         return trigger_map
     
     def _record_equity(self, current_price: float, current_time: int):

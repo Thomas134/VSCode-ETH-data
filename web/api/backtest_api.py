@@ -41,8 +41,9 @@ def _load_kline_with_signals(interval, start_date, end_date):
         dt = datetime.datetime.strptime(end_date, "%Y-%m-%d")
         end_ms = int(dt.timestamp() * 1000)
 
-    # 1. 加载K线数据
-    conn = sqlite3.connect(f"file:{DB_PATH.resolve().as_posix()}?mode=ro", uri=True)
+    # 1. 加载K线数据（使用连接池复用连接）
+    from .config import get_db_connection
+    conn = get_db_connection()
     cursor = conn.cursor()
 
     conditions = ["open_time IS NOT NULL"]
@@ -75,7 +76,7 @@ def _load_kline_with_signals(interval, start_date, end_date):
         if batch_num % 10 == 0:
             print(f"[K线加载] 已加载 {len(kline_rows):,} 条...")
     
-    conn.close()
+    conn.close()  # 关闭连接释放内存
 
     if not kline_rows:
         return []
@@ -84,7 +85,8 @@ def _load_kline_with_signals(interval, start_date, end_date):
     min_time = kline_rows[0][0]
     max_time = kline_rows[-1][0]
 
-    conn = sqlite3.connect(f"file:{STRUCTURE_DB.resolve().as_posix()}?mode=ro", uri=True)
+    from .config import get_structure_connection
+    conn = get_structure_connection()
     cursor = conn.cursor()
 
     cursor.execute(f"""
@@ -103,7 +105,7 @@ def _load_kline_with_signals(interval, start_date, end_date):
             break
         all_std_rows.extend(batch)
     
-    conn.close()
+    conn.close()  # 关闭连接释放内存
 
     # 构建 trigger_map: confirm_time(秒) → signal(-1或1)
     trigger_map = {}
