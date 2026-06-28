@@ -10,6 +10,7 @@ from .config import (
 )
 from .cache_manager import backtest_cache
 from .memory_monitor import log_memory, force_gc
+from .json_profiler import JSONProfiler  # JSON性能测试
 
 backtest_bp = Blueprint('backtest', __name__)
 
@@ -207,7 +208,7 @@ def run_backtest():
             cached_result = backtest_cache.get(cache_params)
             if cached_result:
                 print(f"[Backtest] 缓存命中，直接返回结果")
-                return jsonify(cached_result)
+                return JSONProfiler.profile(cached_result, "backtest_cached")
 
         # 使用流式回测引擎 - 边读边算，不存储全部K线
         from backtest.streaming_engine import StreamingBacktestEngine
@@ -246,7 +247,7 @@ def run_backtest():
         force_gc()
         log_memory("清理后")
 
-        return jsonify(result)
+        return JSONProfiler.profile(result, "backtest")
 
     except Exception as e:
         print(f"[Backtest] 错误: {e}")

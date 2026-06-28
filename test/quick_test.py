@@ -17,7 +17,7 @@ TARGET_URL = "http://localhost:8080/api/backtest"
 # TARGET_URL = "https://your-project.zeabur.app/api/backtest"
 
 # 并发配置
-CONCURRENT_USERS = 1     # 同时在线的虚拟用户数
+CONCURRENT_USERS = 5     # 同时在线的虚拟用户数
 REQUESTS_PER_USER = 1     # 每个用户发送多少请求
 MAX_CONCURRENT_REQUESTS = 3000  # 全局最大并发请求数（防止瞬间压垮服务器）
 

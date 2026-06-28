@@ -14,7 +14,7 @@ from datetime import datetime
 
 # ==================== 配置区域 ====================
 BASE_URL = "http://localhost:8080"
-CONCURRENT_USERS = 50
+CONCURRENT_USERS = 500
 REQUESTS_PER_USER = 1
 MAX_CONCURRENT_REQUESTS = 1000
 WAIT_MIN = 0.0
