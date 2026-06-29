@@ -12,7 +12,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent.parent / "bybit_eth_data" / 
 from flask import Blueprint, jsonify, request
 from bybit_client import BybitClient
 from structure_analyzer import process_containing_relationship, identify_fractals
-from api.config import DB_PATH, STRUCTURE_DB, KLINE_TABLE_MAP, FRACTAL_TABLE_MAP, INTERVAL_MS
+from .config import DB_PATH, STRUCTURE_DB, KLINE_TABLE_MAP, FRACTAL_TABLE_MAP, INTERVAL_MS
 
 realtime_bp = Blueprint('realtime_kline', __name__)
 bybit_client = BybitClient()

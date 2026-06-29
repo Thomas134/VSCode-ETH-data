@@ -5,7 +5,7 @@ import time
 import hmac
 import hashlib
 from urllib.parse import urlencode
-from config import BYBIT_API_KEY, BYBIT_API_SECRET
+from bybit_config import BYBIT_API_KEY, BYBIT_API_SECRET
 
 class BybitClient:
     def __init__(self):
