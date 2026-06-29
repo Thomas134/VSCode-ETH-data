@@ -8,15 +8,15 @@ if (typeof window.__chartJsLoaded !== 'undefined') {
 } else {
     window.__chartJsLoaded = true;
 
-let priceChart = null;
-let volumeChart = null;
-let candlestickSeries = null;
-let volumeSeries = null;
-let currentInterval = '1m';
+window.priceChart = null;
+window.volumeChart = null;
+window.candlestickSeries = null;
+window.volumeSeries = null;
+window.currentInterval = '1m';
 
 // 分页数据管理
-let allCandleData = [];
-let allVolumeData = [];
+window.allCandleData = [];
+window.allVolumeData = [];
 let earliestTime = null;
 let isLoadingMore = false;
 
@@ -502,9 +502,9 @@ function updateDataTime(timestamp) {
 
 // 切换时间周期
 function switchInterval(interval) {
-    if (interval === currentInterval) return;
+    if (interval === window.currentInterval) return;
     
-    currentInterval = interval;
+    window.currentInterval = interval;
     
     // 更新按钮状态
     document.querySelectorAll('.interval-btn').forEach(btn => {
@@ -520,7 +520,8 @@ function switchInterval(interval) {
 
 // 绑定事件
 function bindEvents() {
-    document.querySelectorAll('.interval-btn').forEach(btn => {
+    // 只选择有时间周期 data 属性的按钮（排除数据源切换按钮）
+    document.querySelectorAll('.interval-btn[data-interval]').forEach(btn => {
         btn.addEventListener('click', () => {
             switchInterval(btn.dataset.interval);
         });
@@ -1211,6 +1212,14 @@ function initBacktest() {
         }
     });
 }
+
+// 暴露图表实例和函数给实时模块
+// 注意：变量已在顶部定义为 window.xxx，这里只需要暴露函数
+window.drawFractalRegions = drawFractalRegions;
+window.loadKlineData = loadKlineData;
+window.setStatus = setStatus;
+window.updatePriceDisplay = updatePriceDisplay;
+window.updateDataTime = updateDataTime;
 
 // 在 DOMContentLoaded 中追加
 document.addEventListener('DOMContentLoaded', () => {

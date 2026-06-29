@@ -173,6 +173,22 @@
                     </div>
                 </div>
                 
+                <!-- 数据源切换 -->
+                <div class="data-info" style="margin-top: 15px;">
+                    <div class="info-title">数据源</div>
+                    <div style="display: flex; gap: 8px; margin-top: 8px;">
+                        <button class="interval-btn active" id="btn-source-local" onclick="toggleRealtimeMode(false)" style="flex: 1; font-size: 11px;">
+                            📁 本地
+                        </button>
+                        <button class="interval-btn" id="btn-source-realtime" onclick="toggleRealtimeMode(true)" style="flex: 1; font-size: 11px;">
+                            ⚡ 实时
+                        </button>
+                    </div>
+                    <div id="realtime-status" style="margin-top: 6px; font-size: 10px; color: #888; display: none;">
+                        <span style="color: #0ecb81;">●</span> Bybit实时
+                    </div>
+                </div>
+                
                 <div class="data-info">
                     <div class="info-title">数据统计</div>
                     <div id="data-stats">加载中...</div>
@@ -233,5 +249,6 @@
     <script src="/static/js/utils/validators.js"></script>
     <script>const DEFAULT_LIMIT = {{ config.DEFAULT_LIMIT }};</script>
     <script src="/static/js/chart.js"></script>
+    <script src="/static/js/realtime_kline.js"></script>
 </body>
 </html>

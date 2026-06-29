@@ -6,6 +6,7 @@ from flask import Flask, jsonify, render_template, request
 from api.kline_api import kline_bp
 from api.structure_api import structure_bp
 from api.backtest_api import backtest_bp
+from api.realtime_kline_api import realtime_bp
 from api.cache_manager import kline_cache
 from api.config import DEFAULT_LIMIT
 
@@ -13,6 +14,7 @@ app = Flask(__name__)
 app.register_blueprint(kline_bp)
 app.register_blueprint(structure_bp)
 app.register_blueprint(backtest_bp)
+app.register_blueprint(realtime_bp)
 
 # ── gzip 压缩中间件：对 API 响应自动压缩 ──
 MIN_GZIP_SIZE = 1024
@@ -45,4 +47,5 @@ def clear_cache():
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 8080))
     app.run(host='0.0.0.0', port=port, debug=False)
+
 
