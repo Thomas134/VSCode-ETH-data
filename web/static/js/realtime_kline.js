@@ -3,6 +3,8 @@
 
 let isRealtimeMode = false;
 let realtimeTimer = null;
+let socket = null;
+let currentInterval = '1m';
 
 async function loadRealtimeKlineData(interval, limit = 500) {
     window.setStatus('⟳ 加载实时缠论数据...');
@@ -94,28 +96,90 @@ async function loadRealtimeKlineData(interval, limit = 500) {
 
 function startRealtimePolling(interval) {
     stopRealtimePolling();
+    currentInterval = interval;
     
-    console.log('[Realtime] 启动轮询...');
+    // 使用 WebSocket 替代轮询
+    console.log('[Realtime] 启动 WebSocket...');
     
-    realtimeTimer = setInterval(async () => {
-        try {
-            const response = await fetch(`/api/kline/realtime?interval=${interval}&limit=15`);
-            const result = await response.json();
-            
-            if (result.data && result.data.length > 0) {
-                updateRealtimeCandles(result.data);
+    if (!socket) {
+        socket = io();
+        
+        socket.on('connect', () => {
+            console.log('[WebSocket] 已连接');
+            socket.emit('subscribe_kline', { interval: currentInterval });
+        });
+        
+        socket.on('disconnect', () => {
+            console.log('[WebSocket] 已断开');
+        });
+        
+        socket.on('kline_update', (data) => {
+            if (data.interval === currentInterval) {
+                handleWebSocketKline(data);
             }
-        } catch (e) {
-            console.log('[Realtime] 轮询更新失败:', e);
-        }
-    }, 500);
+        });
+    } else {
+        socket.emit('subscribe_kline', { interval: currentInterval });
+    }
 }
 
 function stopRealtimePolling() {
-    if (realtimeTimer) {
-        clearInterval(realtimeTimer);
-        realtimeTimer = null;
-        console.log('[Realtime] 轮询已停止');
+    if (socket) {
+        socket.disconnect();
+        socket = null;
+        console.log('[WebSocket] 已停止');
+    }
+}
+
+function handleWebSocketKline(data) {
+    // 更新最后一根K线或添加新K线
+    const time = data.time;
+    const lastIndex = window.allCandleData.length - 1;
+    
+    if (lastIndex >= 0 && window.allCandleData[lastIndex].time === time) {
+        // 更新现有K线
+        const kline = {
+            time: data.time,
+            open: data.open,
+            high: data.high,
+            low: data.low,
+            close: data.close,
+        };
+        
+        window.allCandleData[lastIndex] = kline;
+        window.candlestickSeries.update(kline);
+        
+        const volume = {
+            time: data.time,
+            value: data.volume || 0,
+            color: data.close >= data.open ? '#0ecb81' : '#f6465d',
+        };
+        window.allVolumeData[lastIndex] = volume;
+        window.volumeSeries.update(volume);
+        
+        window.updatePriceDisplay(kline);
+    } else if (lastIndex < 0 || time > window.allCandleData[lastIndex].time) {
+        // 新K线
+        const kline = {
+            time: data.time,
+            open: data.open,
+            high: data.high,
+            low: data.low,
+            close: data.close,
+        };
+        
+        window.allCandleData.push(kline);
+        window.candlestickSeries.update(kline);
+        
+        const volume = {
+            time: data.time,
+            value: data.volume || 0,
+            color: data.close >= data.open ? '#0ecb81' : '#f6465d',
+        };
+        window.allVolumeData.push(volume);
+        window.volumeSeries.update(volume);
+        
+        console.log('[WebSocket] 新K线:', new Date(time * 1000).toLocaleTimeString());
     }
 }
 
