@@ -19,6 +19,7 @@ window.allCandleData = [];
 window.allVolumeData = [];
 let earliestTime = null;
 let isLoadingMore = false;
+let isUpdatingData = false;  // 标志：是否正在更新数据（禁用滚动监听）
 
 // 存储分型区间和对应的LineSeries（画水平线段用）
 let fractalRegions = [];
@@ -119,22 +120,26 @@ function initChart() {
         priceScaleId: 'right',
     });
     
-    // 同步两个图表的时间轴（syncing 互斥锁防止死循环）
+    // 同步两个图表的时间轴（用 LogicalRange 避免微小偏差导致的同步问题）
     let syncing = false;
-    priceChart.timeScale().subscribeVisibleTimeRangeChange((range) => {
-        if (range && !syncing) {
-            syncing = true;
-            try { volumeChart.timeScale().setVisibleRange(range); } catch(e) {}
-            syncing = false;
-        }
+    let syncTimer = null;
+    
+    function safeSyncCharts(sourceChart, targetChart, logicalRange) {
+        if (syncing || !logicalRange) return;
+        syncing = true;
+        if (syncTimer) clearTimeout(syncTimer);
+        try {
+            targetChart.timeScale().setVisibleLogicalRange(logicalRange);
+        } catch (e) {}
+        syncTimer = setTimeout(() => { syncing = false; syncTimer = null; }, 50);
+    }
+    
+    priceChart.timeScale().subscribeVisibleLogicalRangeChange((logicalRange) => {
+        safeSyncCharts(priceChart, volumeChart, logicalRange);
     });
     
-    volumeChart.timeScale().subscribeVisibleTimeRangeChange((range) => {
-        if (range && !syncing) {
-            syncing = true;
-            try { priceChart.timeScale().setVisibleRange(range); } catch(e) {}
-            syncing = false;
-        }
+    volumeChart.timeScale().subscribeVisibleLogicalRangeChange((logicalRange) => {
+        safeSyncCharts(volumeChart, priceChart, logicalRange);
     });
     
     // 响应窗口大小变化
@@ -175,7 +180,8 @@ function initChart() {
     
     // 监听时间轴变化 - 滚动到最左侧时加载更多历史数据（防抖300ms）
     priceChart.timeScale().subscribeVisibleLogicalRangeChange((logicalRange) => {
-        if (!logicalRange || isLoadingMore) return;
+        // 数据更新期间跳过监听，避免抖动
+        if (!logicalRange || isLoadingMore || isUpdatingData) return;
         
         // 只有向左滚动（from 变小）时才触发
         const isScrollingLeft = logicalRange.from < lastLogicalFrom;
@@ -312,6 +318,9 @@ async function loadKlineData(interval, limit = DEFAULT_LIMIT) {
         // 记录最早时间 (毫秒)
         earliestTime = data[0].time * 1000;
         
+        // 设置标志，禁用滚动监听，避免抖动
+        isUpdatingData = true;
+        
         // 更新图表
         candlestickSeries.setData(allCandleData);
         volumeSeries.setData(allVolumeData);
@@ -319,6 +328,11 @@ async function loadKlineData(interval, limit = DEFAULT_LIMIT) {
         // 自动滚动到最新K线（用 try-catch 保护，避免 null 报错）
         try { priceChart.timeScale().scrollToRealTime(); } catch(e) {}
         try { volumeChart.timeScale().scrollToRealTime(); } catch(e) {}
+        
+        // 延迟恢复滚动监听（给图表渲染时间）
+        setTimeout(() => {
+            isUpdatingData = false;
+        }, 100);
         
         // 保存分型区间并绘制水平线
         fractalRegions = regions;
@@ -411,28 +425,10 @@ async function loadMoreHistory() {
         
         // 更新最早时间
         earliestTime = data[0].time * 1000;
-        
-        // 保存当前可视范围（在 setData 前，因为 setData 会重置视野）
-        const prevRange = priceChart.timeScale().getVisibleLogicalRange();
 
-        // 更新图表
+        // 更新图表（和结构K线一样简单）
         candlestickSeries.setData(allCandleData);
         volumeSeries.setData(allVolumeData);
-
-        // 恢复可视范围，偏移新数据的数量，避免 K 线跳动
-        if (prevRange) {
-            const offset = newCandleData.length;
-            try {
-                priceChart.timeScale().setVisibleLogicalRange({
-                    from: prevRange.from + offset,
-                    to: prevRange.to + offset,
-                });
-                volumeChart.timeScale().setVisibleLogicalRange({
-                    from: prevRange.from + offset,
-                    to: prevRange.to + offset,
-                });
-            } catch (e) { /* 边界情况忽略 */ }
-        }
         
         drawFractalRegions();
         
