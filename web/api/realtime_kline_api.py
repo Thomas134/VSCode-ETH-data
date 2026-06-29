@@ -126,6 +126,55 @@ def get_bybit_latest(interval, limit=5):
         return []
 
 
+def fill_gap_klines(interval, start_time, end_time):
+    """
+    从Bybit获取指定时间区间的K线数据，填补断层
+    简化逻辑：直接获取区间内的所有数据
+    """
+    if interval not in BYBIT_INTERVAL:
+        return []
+    
+    try:
+        interval_ms = INTERVAL_MS[interval]
+        
+        # 直接获取整个区间的数据（Bybit最多返回200条，应该够用了）
+        klines = bybit_client.get_klines(
+            "ETHUSDT", 
+            BYBIT_INTERVAL[interval], 
+            start_time=start_time,
+            limit=200
+        )
+        
+        if not klines:
+            print(f"[Fill Gap] 无数据返回")
+            return []
+        
+        # 过滤在目标区间内的数据
+        all_klines = []
+        for k in klines:
+            k_time = int(k[0])
+            if start_time <= k_time <= end_time:
+                all_klines.append({
+                    'start_time': k_time,
+                    'end_time': k_time + interval_ms,
+                    'open': float(k[1]),
+                    'high': float(k[2]),
+                    'low': float(k[3]),
+                    'close': float(k[4]),
+                    'volume': float(k[5]),
+                    'fractal_label': 0
+                })
+        
+        print(f"[Fill Gap] 区间 {start_time} ~ {end_time}, 获取 {len(all_klines)} 条数据")
+        return all_klines
+        
+    except Exception as e:
+        print(f"[Fill Gap Error] {e}")
+        import traceback
+        traceback.print_exc()
+        return []
+
+
 def format_kline_for_frontend(k):
     """转换为前端需要的格式"""
     return {
@@ -158,7 +207,49 @@ def get_realtime_kline():
         # 2. 获取Bybit实时数据
         live_klines = get_bybit_latest(interval, limit=5)
         
-        # 3. 合并数据（新数据覆盖旧数据）
+        # 3. 【新增】检测并填补断层（仅在第一次加载时执行，limit > 100认为是首次加载）
+        interval_ms = INTERVAL_MS[interval]
+        gap_filled_count = 0
+        
+        # 只在首次加载时判断断层，轮询更新时不判断
+        if limit > 100 and local_klines and live_klines:
+            # 获取本地最后一条的结束时间和实时第一条的开始时间
+            local_last_end = local_klines[-1]['end_time']
+            live_first_start = live_klines[0]['start_time']
+            
+            # 检测是否有断层（间隔超过一个K线周期）
+            gap_threshold = interval_ms * 2
+            
+            if live_first_start > local_last_end + gap_threshold:
+                gap_size = (live_first_start - local_last_end) // interval_ms - 1
+                print(f"[Gap Detected] 本地结束: {local_last_end}, 实时开始: {live_first_start}, 断层: {gap_size} 根K线")
+                
+                # 限制最大填补数量（避免一次性获取太多数据）
+                MAX_GAP_FILL = 200  # 最多填补200条
+                
+                # 计算需要填补的区间
+                # 从本地最后一条的下一条开始，到实时第一条的前一条结束（或最多MAX_GAP_FILL条）
+                gap_start = local_last_end
+                
+                if gap_size > MAX_GAP_FILL:
+                    print(f"[Gap Warning] 断层太大({gap_size}条)，只填补最近{MAX_GAP_FILL}条")
+                    # 只填补最近的MAX_GAP_FILL条
+                    gap_start = live_first_start - interval_ms * (MAX_GAP_FILL + 1)
+                
+                gap_end = live_first_start - interval_ms
+                
+                # 获取缺失的数据
+                gap_klines = fill_gap_klines(interval, gap_start, gap_end)
+                
+                if gap_klines:
+                    gap_filled_count = len(gap_klines)
+                    print(f"[Gap Filled] 成功填补 {gap_filled_count} 条数据")
+                    # 将填补的数据插入到实时数据之前
+                    live_klines = gap_klines + live_klines
+                else:
+                    print("[Gap Warning] 无法获取断层数据")
+        
+        # 4. 合并数据（新数据覆盖旧数据）
         time_map = {k['start_time']: k for k in local_klines}
         
         for live_k in live_klines:
@@ -206,7 +297,8 @@ def get_realtime_kline():
             "source": "realtime",
             "is_realtime": len(live_klines) > 0,
             "local_count": len(local_klines),
-            "live_count": len(live_klines)
+            "live_count": len(live_klines),
+            "gap_filled_count": gap_filled_count
         })
         
     except Exception as e:
