@@ -108,7 +108,7 @@ function startRealtimePolling(interval) {
         } catch (e) {
             console.log('[Realtime] 轮询更新失败:', e);
         }
-    }, 5000);
+    }, 500);
 }
 
 function stopRealtimePolling() {
