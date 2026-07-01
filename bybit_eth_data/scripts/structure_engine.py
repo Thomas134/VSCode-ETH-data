@@ -7,7 +7,7 @@
 import sqlite3
 from pathlib import Path
 from datetime import datetime
-from config import DATA_DIR, TIME_INTERVALS
+from bybit_config import DATA_DIR, TIME_INTERVALS
 from structure_analyzer import (
     is_containing,
     merge_klines,

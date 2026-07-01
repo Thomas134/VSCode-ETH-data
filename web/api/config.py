@@ -27,20 +27,18 @@ DUCKDB_AVAILABLE = _duckdb_installed and DUCKDB_KLINE_PATH.exists() and DUCKDB_S
 
 def get_db_connection():
     """
-    获取数据库连接（WAL模式优化）
+    获取数据库连接（只读，WAL模式已在写入端设置，此处无需重复）
     每次新建连接，用完务必调用 conn.close()！
     """
     conn = sqlite3.connect(f"file:{DB_PATH}?mode=ro", uri=True)
-    conn.execute("PRAGMA journal_mode=WAL")
     conn.execute("PRAGMA synchronous=NORMAL")
     conn.execute("PRAGMA cache_size=5000")  # 减小到 20MB，避免内存过大
     conn.row_factory = sqlite3.Row
     return conn
 
 def get_structure_connection():
-    """获取结构数据库连接（WAL模式优化）"""
+    """获取结构数据库连接（只读，WAL模式已在写入端设置，此处无需重复）"""
     conn = sqlite3.connect(f"file:{STRUCTURE_DB}?mode=ro", uri=True)
-    conn.execute("PRAGMA journal_mode=WAL")
     conn.execute("PRAGMA synchronous=NORMAL")
     conn.execute("PRAGMA cache_size=5000")  # 减小缓存
     conn.row_factory = sqlite3.Row

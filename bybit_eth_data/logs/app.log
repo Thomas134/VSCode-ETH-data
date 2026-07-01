@@ -1,0 +1,376 @@
+2026-07-01 20:19:40,507 - app - ERROR - Exception on / [GET]
+Traceback (most recent call last):
+  File "C:\Users\ASUS\AppData\Local\Programs\Python\Python310\lib\site-packages\flask\app.py", line 2528, in wsgi_app
+    response = self.full_dispatch_request()
+  File "C:\Users\ASUS\AppData\Local\Programs\Python\Python310\lib\site-packages\flask\app.py", line 1825, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "C:\Users\ASUS\AppData\Local\Programs\Python\Python310\lib\site-packages\flask\app.py", line 1823, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "C:\Users\ASUS\AppData\Local\Programs\Python\Python310\lib\site-packages\flask\app.py", line 1799, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)
+  File "d:\coding项目\VSCode-ETH-data\web\app.py", line 46, in index
+    return render_template('index.html', config={"DEFAULT_LIMIT": DEFAULT_LIMIT})
+  File "C:\Users\ASUS\AppData\Local\Programs\Python\Python310\lib\site-packages\flask\templating.py", line 146, in render_template
+    template = app.jinja_env.get_or_select_template(template_name_or_list)
+  File "C:\Users\ASUS\AppData\Local\Programs\Python\Python310\lib\site-packages\jinja2\environment.py", line 1081, in get_or_select_template
+    return self.get_template(template_name_or_list, parent, globals)
+  File "C:\Users\ASUS\AppData\Local\Programs\Python\Python310\lib\site-packages\jinja2\environment.py", line 1010, in get_template
+    return self._load_template(name, globals)
+  File "C:\Users\ASUS\AppData\Local\Programs\Python\Python310\lib\site-packages\jinja2\environment.py", line 969, in _load_template
+    template = self.loader.load(self, name, self.make_globals(globals))
+  File "C:\Users\ASUS\AppData\Local\Programs\Python\Python310\lib\site-packages\jinja2\loaders.py", line 126, in load
+    source, filename, uptodate = self.get_source(environment, name)
+  File "C:\Users\ASUS\AppData\Local\Programs\Python\Python310\lib\site-packages\flask\templating.py", line 62, in get_source
+    return self._get_source_fast(environment, template)
+  File "C:\Users\ASUS\AppData\Local\Programs\Python\Python310\lib\site-packages\flask\templating.py", line 98, in _get_source_fast
+    raise TemplateNotFound(template)
+jinja2.exceptions.TemplateNotFound: index.html
+2026-07-01 20:19:41,256 - app - ERROR - Exception on / [GET]
+Traceback (most recent call last):
+  File "C:\Users\ASUS\AppData\Local\Programs\Python\Python310\lib\site-packages\flask\app.py", line 2528, in wsgi_app
+    response = self.full_dispatch_request()
+  File "C:\Users\ASUS\AppData\Local\Programs\Python\Python310\lib\site-packages\flask\app.py", line 1825, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "C:\Users\ASUS\AppData\Local\Programs\Python\Python310\lib\site-packages\flask\app.py", line 1823, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "C:\Users\ASUS\AppData\Local\Programs\Python\Python310\lib\site-packages\flask\app.py", line 1799, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)
+  File "d:\coding项目\VSCode-ETH-data\web\app.py", line 46, in index
+    return render_template('index.html', config={"DEFAULT_LIMIT": DEFAULT_LIMIT})
+  File "C:\Users\ASUS\AppData\Local\Programs\Python\Python310\lib\site-packages\flask\templating.py", line 146, in render_template
+    template = app.jinja_env.get_or_select_template(template_name_or_list)
+  File "C:\Users\ASUS\AppData\Local\Programs\Python\Python310\lib\site-packages\jinja2\environment.py", line 1081, in get_or_select_template
+    return self.get_template(template_name_or_list, parent, globals)
+  File "C:\Users\ASUS\AppData\Local\Programs\Python\Python310\lib\site-packages\jinja2\environment.py", line 1010, in get_template
+    return self._load_template(name, globals)
+  File "C:\Users\ASUS\AppData\Local\Programs\Python\Python310\lib\site-packages\jinja2\environment.py", line 969, in _load_template
+    template = self.loader.load(self, name, self.make_globals(globals))
+  File "C:\Users\ASUS\AppData\Local\Programs\Python\Python310\lib\site-packages\jinja2\loaders.py", line 126, in load
+    source, filename, uptodate = self.get_source(environment, name)
+  File "C:\Users\ASUS\AppData\Local\Programs\Python\Python310\lib\site-packages\flask\templating.py", line 62, in get_source
+    return self._get_source_fast(environment, template)
+  File "C:\Users\ASUS\AppData\Local\Programs\Python\Python310\lib\site-packages\flask\templating.py", line 98, in _get_source_fast
+    raise TemplateNotFound(template)
+jinja2.exceptions.TemplateNotFound: index.html
+2026-07-01 20:19:41,622 - app - ERROR - Exception on / [GET]
+Traceback (most recent call last):
+  File "C:\Users\ASUS\AppData\Local\Programs\Python\Python310\lib\site-packages\flask\app.py", line 2528, in wsgi_app
+    response = self.full_dispatch_request()
+  File "C:\Users\ASUS\AppData\Local\Programs\Python\Python310\lib\site-packages\flask\app.py", line 1825, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "C:\Users\ASUS\AppData\Local\Programs\Python\Python310\lib\site-packages\flask\app.py", line 1823, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "C:\Users\ASUS\AppData\Local\Programs\Python\Python310\lib\site-packages\flask\app.py", line 1799, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)
+  File "d:\coding项目\VSCode-ETH-data\web\app.py", line 46, in index
+    return render_template('index.html', config={"DEFAULT_LIMIT": DEFAULT_LIMIT})
+  File "C:\Users\ASUS\AppData\Local\Programs\Python\Python310\lib\site-packages\flask\templating.py", line 146, in render_template
+    template = app.jinja_env.get_or_select_template(template_name_or_list)
+  File "C:\Users\ASUS\AppData\Local\Programs\Python\Python310\lib\site-packages\jinja2\environment.py", line 1081, in get_or_select_template
+    return self.get_template(template_name_or_list, parent, globals)
+  File "C:\Users\ASUS\AppData\Local\Programs\Python\Python310\lib\site-packages\jinja2\environment.py", line 1010, in get_template
+    return self._load_template(name, globals)
+  File "C:\Users\ASUS\AppData\Local\Programs\Python\Python310\lib\site-packages\jinja2\environment.py", line 969, in _load_template
+    template = self.loader.load(self, name, self.make_globals(globals))
+  File "C:\Users\ASUS\AppData\Local\Programs\Python\Python310\lib\site-packages\jinja2\loaders.py", line 126, in load
+    source, filename, uptodate = self.get_source(environment, name)
+  File "C:\Users\ASUS\AppData\Local\Programs\Python\Python310\lib\site-packages\flask\templating.py", line 62, in get_source
+    return self._get_source_fast(environment, template)
+  File "C:\Users\ASUS\AppData\Local\Programs\Python\Python310\lib\site-packages\flask\templating.py", line 98, in _get_source_fast
+    raise TemplateNotFound(template)
+jinja2.exceptions.TemplateNotFound: index.html
+2026-07-01 20:19:42,392 - app - ERROR - Exception on / [GET]
+Traceback (most recent call last):
+  File "C:\Users\ASUS\AppData\Local\Programs\Python\Python310\lib\site-packages\flask\app.py", line 2528, in wsgi_app
+    response = self.full_dispatch_request()
+  File "C:\Users\ASUS\AppData\Local\Programs\Python\Python310\lib\site-packages\flask\app.py", line 1825, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "C:\Users\ASUS\AppData\Local\Programs\Python\Python310\lib\site-packages\flask\app.py", line 1823, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "C:\Users\ASUS\AppData\Local\Programs\Python\Python310\lib\site-packages\flask\app.py", line 1799, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)
+  File "d:\coding项目\VSCode-ETH-data\web\app.py", line 46, in index
+    return render_template('index.html', config={"DEFAULT_LIMIT": DEFAULT_LIMIT})
+  File "C:\Users\ASUS\AppData\Local\Programs\Python\Python310\lib\site-packages\flask\templating.py", line 146, in render_template
+    template = app.jinja_env.get_or_select_template(template_name_or_list)
+  File "C:\Users\ASUS\AppData\Local\Programs\Python\Python310\lib\site-packages\jinja2\environment.py", line 1081, in get_or_select_template
+    return self.get_template(template_name_or_list, parent, globals)
+  File "C:\Users\ASUS\AppData\Local\Programs\Python\Python310\lib\site-packages\jinja2\environment.py", line 1010, in get_template
+    return self._load_template(name, globals)
+  File "C:\Users\ASUS\AppData\Local\Programs\Python\Python310\lib\site-packages\jinja2\environment.py", line 969, in _load_template
+    template = self.loader.load(self, name, self.make_globals(globals))
+  File "C:\Users\ASUS\AppData\Local\Programs\Python\Python310\lib\site-packages\jinja2\loaders.py", line 126, in load
+    source, filename, uptodate = self.get_source(environment, name)
+  File "C:\Users\ASUS\AppData\Local\Programs\Python\Python310\lib\site-packages\flask\templating.py", line 62, in get_source
+    return self._get_source_fast(environment, template)
+  File "C:\Users\ASUS\AppData\Local\Programs\Python\Python310\lib\site-packages\flask\templating.py", line 98, in _get_source_fast
+    raise TemplateNotFound(template)
+jinja2.exceptions.TemplateNotFound: index.html
+2026-07-01 20:19:42,607 - app - ERROR - Exception on / [GET]
+Traceback (most recent call last):
+  File "C:\Users\ASUS\AppData\Local\Programs\Python\Python310\lib\site-packages\flask\app.py", line 2528, in wsgi_app
+    response = self.full_dispatch_request()
+  File "C:\Users\ASUS\AppData\Local\Programs\Python\Python310\lib\site-packages\flask\app.py", line 1825, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "C:\Users\ASUS\AppData\Local\Programs\Python\Python310\lib\site-packages\flask\app.py", line 1823, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "C:\Users\ASUS\AppData\Local\Programs\Python\Python310\lib\site-packages\flask\app.py", line 1799, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)
+  File "d:\coding项目\VSCode-ETH-data\web\app.py", line 46, in index
+    return render_template('index.html', config={"DEFAULT_LIMIT": DEFAULT_LIMIT})
+  File "C:\Users\ASUS\AppData\Local\Programs\Python\Python310\lib\site-packages\flask\templating.py", line 146, in render_template
+    template = app.jinja_env.get_or_select_template(template_name_or_list)
+  File "C:\Users\ASUS\AppData\Local\Programs\Python\Python310\lib\site-packages\jinja2\environment.py", line 1081, in get_or_select_template
+    return self.get_template(template_name_or_list, parent, globals)
+  File "C:\Users\ASUS\AppData\Local\Programs\Python\Python310\lib\site-packages\jinja2\environment.py", line 1010, in get_template
+    return self._load_template(name, globals)
+  File "C:\Users\ASUS\AppData\Local\Programs\Python\Python310\lib\site-packages\jinja2\environment.py", line 969, in _load_template
+    template = self.loader.load(self, name, self.make_globals(globals))
+  File "C:\Users\ASUS\AppData\Local\Programs\Python\Python310\lib\site-packages\jinja2\loaders.py", line 126, in load
+    source, filename, uptodate = self.get_source(environment, name)
+  File "C:\Users\ASUS\AppData\Local\Programs\Python\Python310\lib\site-packages\flask\templating.py", line 62, in get_source
+    return self._get_source_fast(environment, template)
+  File "C:\Users\ASUS\AppData\Local\Programs\Python\Python310\lib\site-packages\flask\templating.py", line 98, in _get_source_fast
+    raise TemplateNotFound(template)
+jinja2.exceptions.TemplateNotFound: index.html
+2026-07-01 20:19:42,796 - app - ERROR - Exception on / [GET]
+Traceback (most recent call last):
+  File "C:\Users\ASUS\AppData\Local\Programs\Python\Python310\lib\site-packages\flask\app.py", line 2528, in wsgi_app
+    response = self.full_dispatch_request()
+  File "C:\Users\ASUS\AppData\Local\Programs\Python\Python310\lib\site-packages\flask\app.py", line 1825, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "C:\Users\ASUS\AppData\Local\Programs\Python\Python310\lib\site-packages\flask\app.py", line 1823, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "C:\Users\ASUS\AppData\Local\Programs\Python\Python310\lib\site-packages\flask\app.py", line 1799, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)
+  File "d:\coding项目\VSCode-ETH-data\web\app.py", line 46, in index
+    return render_template('index.html', config={"DEFAULT_LIMIT": DEFAULT_LIMIT})
+  File "C:\Users\ASUS\AppData\Local\Programs\Python\Python310\lib\site-packages\flask\templating.py", line 146, in render_template
+    template = app.jinja_env.get_or_select_template(template_name_or_list)
+  File "C:\Users\ASUS\AppData\Local\Programs\Python\Python310\lib\site-packages\jinja2\environment.py", line 1081, in get_or_select_template
+    return self.get_template(template_name_or_list, parent, globals)
+  File "C:\Users\ASUS\AppData\Local\Programs\Python\Python310\lib\site-packages\jinja2\environment.py", line 1010, in get_template
+    return self._load_template(name, globals)
+  File "C:\Users\ASUS\AppData\Local\Programs\Python\Python310\lib\site-packages\jinja2\environment.py", line 969, in _load_template
+    template = self.loader.load(self, name, self.make_globals(globals))
+  File "C:\Users\ASUS\AppData\Local\Programs\Python\Python310\lib\site-packages\jinja2\loaders.py", line 126, in load
+    source, filename, uptodate = self.get_source(environment, name)
+  File "C:\Users\ASUS\AppData\Local\Programs\Python\Python310\lib\site-packages\flask\templating.py", line 62, in get_source
+    return self._get_source_fast(environment, template)
+  File "C:\Users\ASUS\AppData\Local\Programs\Python\Python310\lib\site-packages\flask\templating.py", line 98, in _get_source_fast
+    raise TemplateNotFound(template)
+jinja2.exceptions.TemplateNotFound: index.html
+2026-07-01 20:23:23,225 - app - ERROR - Exception on / [GET]
+Traceback (most recent call last):
+  File "C:\Users\ASUS\AppData\Local\Programs\Python\Python310\lib\site-packages\flask\app.py", line 2528, in wsgi_app
+    response = self.full_dispatch_request()
+  File "C:\Users\ASUS\AppData\Local\Programs\Python\Python310\lib\site-packages\flask\app.py", line 1825, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "C:\Users\ASUS\AppData\Local\Programs\Python\Python310\lib\site-packages\flask\app.py", line 1823, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "C:\Users\ASUS\AppData\Local\Programs\Python\Python310\lib\site-packages\flask\app.py", line 1799, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)
+  File "d:\coding项目\VSCode-ETH-data\web\app.py", line 46, in index
+    return render_template('index.html', config={"DEFAULT_LIMIT": DEFAULT_LIMIT})
+  File "C:\Users\ASUS\AppData\Local\Programs\Python\Python310\lib\site-packages\flask\templating.py", line 146, in render_template
+    template = app.jinja_env.get_or_select_template(template_name_or_list)
+  File "C:\Users\ASUS\AppData\Local\Programs\Python\Python310\lib\site-packages\jinja2\environment.py", line 1081, in get_or_select_template
+    return self.get_template(template_name_or_list, parent, globals)
+  File "C:\Users\ASUS\AppData\Local\Programs\Python\Python310\lib\site-packages\jinja2\environment.py", line 1010, in get_template
+    return self._load_template(name, globals)
+  File "C:\Users\ASUS\AppData\Local\Programs\Python\Python310\lib\site-packages\jinja2\environment.py", line 969, in _load_template
+    template = self.loader.load(self, name, self.make_globals(globals))
+  File "C:\Users\ASUS\AppData\Local\Programs\Python\Python310\lib\site-packages\jinja2\loaders.py", line 126, in load
+    source, filename, uptodate = self.get_source(environment, name)
+  File "C:\Users\ASUS\AppData\Local\Programs\Python\Python310\lib\site-packages\flask\templating.py", line 62, in get_source
+    return self._get_source_fast(environment, template)
+  File "C:\Users\ASUS\AppData\Local\Programs\Python\Python310\lib\site-packages\flask\templating.py", line 95, in _get_source_fast
+    return loader.get_source(environment, template)
+  File "C:\Users\ASUS\AppData\Local\Programs\Python\Python310\lib\site-packages\jinja2\loaders.py", line 204, in get_source
+    contents = f.read().decode(self.encoding)
+UnicodeDecodeError: 'utf-8' codec can't decode byte 0xd3 in position 165: invalid continuation byte
+2026-07-01 20:23:24,136 - app - ERROR - Exception on / [GET]
+Traceback (most recent call last):
+  File "C:\Users\ASUS\AppData\Local\Programs\Python\Python310\lib\site-packages\flask\app.py", line 2528, in wsgi_app
+    response = self.full_dispatch_request()
+  File "C:\Users\ASUS\AppData\Local\Programs\Python\Python310\lib\site-packages\flask\app.py", line 1825, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "C:\Users\ASUS\AppData\Local\Programs\Python\Python310\lib\site-packages\flask\app.py", line 1823, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "C:\Users\ASUS\AppData\Local\Programs\Python\Python310\lib\site-packages\flask\app.py", line 1799, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)
+  File "d:\coding项目\VSCode-ETH-data\web\app.py", line 46, in index
+    return render_template('index.html', config={"DEFAULT_LIMIT": DEFAULT_LIMIT})
+  File "C:\Users\ASUS\AppData\Local\Programs\Python\Python310\lib\site-packages\flask\templating.py", line 146, in render_template
+    template = app.jinja_env.get_or_select_template(template_name_or_list)
+  File "C:\Users\ASUS\AppData\Local\Programs\Python\Python310\lib\site-packages\jinja2\environment.py", line 1081, in get_or_select_template
+    return self.get_template(template_name_or_list, parent, globals)
+  File "C:\Users\ASUS\AppData\Local\Programs\Python\Python310\lib\site-packages\jinja2\environment.py", line 1010, in get_template
+    return self._load_template(name, globals)
+  File "C:\Users\ASUS\AppData\Local\Programs\Python\Python310\lib\site-packages\jinja2\environment.py", line 969, in _load_template
+    template = self.loader.load(self, name, self.make_globals(globals))
+  File "C:\Users\ASUS\AppData\Local\Programs\Python\Python310\lib\site-packages\jinja2\loaders.py", line 126, in load
+    source, filename, uptodate = self.get_source(environment, name)
+  File "C:\Users\ASUS\AppData\Local\Programs\Python\Python310\lib\site-packages\flask\templating.py", line 62, in get_source
+    return self._get_source_fast(environment, template)
+  File "C:\Users\ASUS\AppData\Local\Programs\Python\Python310\lib\site-packages\flask\templating.py", line 95, in _get_source_fast
+    return loader.get_source(environment, template)
+  File "C:\Users\ASUS\AppData\Local\Programs\Python\Python310\lib\site-packages\jinja2\loaders.py", line 204, in get_source
+    contents = f.read().decode(self.encoding)
+UnicodeDecodeError: 'utf-8' codec can't decode byte 0xd3 in position 165: invalid continuation byte
+2026-07-01 20:23:24,742 - app - ERROR - Exception on / [GET]
+Traceback (most recent call last):
+  File "C:\Users\ASUS\AppData\Local\Programs\Python\Python310\lib\site-packages\flask\app.py", line 2528, in wsgi_app
+    response = self.full_dispatch_request()
+  File "C:\Users\ASUS\AppData\Local\Programs\Python\Python310\lib\site-packages\flask\app.py", line 1825, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "C:\Users\ASUS\AppData\Local\Programs\Python\Python310\lib\site-packages\flask\app.py", line 1823, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "C:\Users\ASUS\AppData\Local\Programs\Python\Python310\lib\site-packages\flask\app.py", line 1799, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)
+  File "d:\coding项目\VSCode-ETH-data\web\app.py", line 46, in index
+    return render_template('index.html', config={"DEFAULT_LIMIT": DEFAULT_LIMIT})
+  File "C:\Users\ASUS\AppData\Local\Programs\Python\Python310\lib\site-packages\flask\templating.py", line 146, in render_template
+    template = app.jinja_env.get_or_select_template(template_name_or_list)
+  File "C:\Users\ASUS\AppData\Local\Programs\Python\Python310\lib\site-packages\jinja2\environment.py", line 1081, in get_or_select_template
+    return self.get_template(template_name_or_list, parent, globals)
+  File "C:\Users\ASUS\AppData\Local\Programs\Python\Python310\lib\site-packages\jinja2\environment.py", line 1010, in get_template
+    return self._load_template(name, globals)
+  File "C:\Users\ASUS\AppData\Local\Programs\Python\Python310\lib\site-packages\jinja2\environment.py", line 969, in _load_template
+    template = self.loader.load(self, name, self.make_globals(globals))
+  File "C:\Users\ASUS\AppData\Local\Programs\Python\Python310\lib\site-packages\jinja2\loaders.py", line 126, in load
+    source, filename, uptodate = self.get_source(environment, name)
+  File "C:\Users\ASUS\AppData\Local\Programs\Python\Python310\lib\site-packages\flask\templating.py", line 62, in get_source
+    return self._get_source_fast(environment, template)
+  File "C:\Users\ASUS\AppData\Local\Programs\Python\Python310\lib\site-packages\flask\templating.py", line 95, in _get_source_fast
+    return loader.get_source(environment, template)
+  File "C:\Users\ASUS\AppData\Local\Programs\Python\Python310\lib\site-packages\jinja2\loaders.py", line 204, in get_source
+    contents = f.read().decode(self.encoding)
+UnicodeDecodeError: 'utf-8' codec can't decode byte 0xd3 in position 165: invalid continuation byte
+2026-07-01 20:28:14,959 - app - ERROR - Exception on / [GET]
+Traceback (most recent call last):
+  File "C:\Users\ASUS\AppData\Local\Programs\Python\Python310\lib\site-packages\flask\app.py", line 2528, in wsgi_app
+    response = self.full_dispatch_request()
+  File "C:\Users\ASUS\AppData\Local\Programs\Python\Python310\lib\site-packages\flask\app.py", line 1825, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "C:\Users\ASUS\AppData\Local\Programs\Python\Python310\lib\site-packages\flask\app.py", line 1823, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "C:\Users\ASUS\AppData\Local\Programs\Python\Python310\lib\site-packages\flask\app.py", line 1799, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)
+  File "d:\coding项目\VSCode-ETH-data\web\app.py", line 46, in index
+    return render_template('index.html', config={"DEFAULT_LIMIT": DEFAULT_LIMIT})
+  File "C:\Users\ASUS\AppData\Local\Programs\Python\Python310\lib\site-packages\flask\templating.py", line 147, in render_template
+    return _render(app, template, context)
+  File "C:\Users\ASUS\AppData\Local\Programs\Python\Python310\lib\site-packages\flask\templating.py", line 130, in _render
+    rv = template.render(context)
+  File "C:\Users\ASUS\AppData\Local\Programs\Python\Python310\lib\site-packages\jinja2\environment.py", line 1301, in render
+    self.environment.handle_exception()
+  File "C:\Users\ASUS\AppData\Local\Programs\Python\Python310\lib\site-packages\jinja2\environment.py", line 936, in handle_exception
+    raise rewrite_traceback_stack(source=source)
+  File "d:\coding项目\VSCode-ETH-data\web\templates\index.html", line 1, in top-level template code
+    {% extends "base.html" %}
+  File "C:\Users\ASUS\AppData\Local\Programs\Python\Python310\lib\site-packages\flask\templating.py", line 62, in get_source
+    return self._get_source_fast(environment, template)
+  File "C:\Users\ASUS\AppData\Local\Programs\Python\Python310\lib\site-packages\flask\templating.py", line 95, in _get_source_fast
+    return loader.get_source(environment, template)
+  File "C:\Users\ASUS\AppData\Local\Programs\Python\Python310\lib\site-packages\jinja2\loaders.py", line 204, in get_source
+    contents = f.read().decode(self.encoding)
+UnicodeDecodeError: 'utf-8' codec can't decode byte 0xb6 in position 482: invalid start byte
+2026-07-01 20:28:15,602 - app - ERROR - Exception on / [GET]
+Traceback (most recent call last):
+  File "C:\Users\ASUS\AppData\Local\Programs\Python\Python310\lib\site-packages\flask\app.py", line 2528, in wsgi_app
+    response = self.full_dispatch_request()
+  File "C:\Users\ASUS\AppData\Local\Programs\Python\Python310\lib\site-packages\flask\app.py", line 1825, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "C:\Users\ASUS\AppData\Local\Programs\Python\Python310\lib\site-packages\flask\app.py", line 1823, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "C:\Users\ASUS\AppData\Local\Programs\Python\Python310\lib\site-packages\flask\app.py", line 1799, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)
+  File "d:\coding项目\VSCode-ETH-data\web\app.py", line 46, in index
+    return render_template('index.html', config={"DEFAULT_LIMIT": DEFAULT_LIMIT})
+  File "C:\Users\ASUS\AppData\Local\Programs\Python\Python310\lib\site-packages\flask\templating.py", line 147, in render_template
+    return _render(app, template, context)
+  File "C:\Users\ASUS\AppData\Local\Programs\Python\Python310\lib\site-packages\flask\templating.py", line 130, in _render
+    rv = template.render(context)
+  File "C:\Users\ASUS\AppData\Local\Programs\Python\Python310\lib\site-packages\jinja2\environment.py", line 1301, in render
+    self.environment.handle_exception()
+  File "C:\Users\ASUS\AppData\Local\Programs\Python\Python310\lib\site-packages\jinja2\environment.py", line 936, in handle_exception
+    raise rewrite_traceback_stack(source=source)
+  File "d:\coding项目\VSCode-ETH-data\web\templates\index.html", line 1, in top-level template code
+    {% extends "base.html" %}
+  File "C:\Users\ASUS\AppData\Local\Programs\Python\Python310\lib\site-packages\flask\templating.py", line 62, in get_source
+    return self._get_source_fast(environment, template)
+  File "C:\Users\ASUS\AppData\Local\Programs\Python\Python310\lib\site-packages\flask\templating.py", line 95, in _get_source_fast
+    return loader.get_source(environment, template)
+  File "C:\Users\ASUS\AppData\Local\Programs\Python\Python310\lib\site-packages\jinja2\loaders.py", line 204, in get_source
+    contents = f.read().decode(self.encoding)
+UnicodeDecodeError: 'utf-8' codec can't decode byte 0xb6 in position 482: invalid start byte
+2026-07-01 20:29:02,600 - api.memory_monitor - INFO - [Memory 回测开始] 当前占用: 115.9 MB
+2026-07-01 20:29:02,601 - api.backtest_api - INFO - [回测请求] interval=1m, params={'interval': '1m', 'start_date': '', 'end_date': '', 'mode': 'both', 'stop_loss_pct': 2, 'take_profit_pct': 5, 'initial_capital': 10000, 'fee_rate': 0.05, 'position_mode': 'percent', 'percent_per_trade': 20, 'fixed_amount': 1000, 'max_positions': 3, 'use_stop_profit': True, '_skip_cache': False}
+2026-07-01 20:29:02,602 - api.backtest_api - INFO - [缓存调试] cache_params={"end_date":"","fee_rate":0.05,"fixed_amount":1000,"initial_capital":10000,"interval":"1m","max_positions":3,"mode":"both","percent_per_trade":20,"position_mode":"percent","start_date":"","stop_loss_pct":2,"take_profit_pct":5,"use_stop_profit":true}
+2026-07-01 20:29:02,650 - api.backtest_api - INFO - [回测] DuckDB 不可用，回退到流式引擎
+2026-07-01 20:29:02,658 - backtest.streaming_engine - INFO - [DB选择] 结构库使用 SQLite
+2026-07-01 20:29:05,086 - backtest.streaming_engine - INFO - [流式回测] 加载了 233347 个分型信号
+2026-07-01 20:29:05,088 - backtest.streaming_engine - INFO - ============================================================
+2026-07-01 20:29:05,088 - backtest.streaming_engine - INFO - [回测] 开始 - 资金=10000.0
+2026-07-01 20:29:05,089 - backtest.streaming_engine - INFO - [回测] 使用流式处理，内存占用恒定
+2026-07-01 20:29:05,090 - backtest.streaming_engine - INFO - ============================================================
+2026-07-01 20:29:05,091 - backtest.streaming_engine - INFO - [DB选择] K线库使用 SQLite
+2026-07-01 20:29:05,420 - backtest.streaming_engine - INFO - [回测] 已处理 50000 根K线
+2026-07-01 20:29:05,766 - backtest.streaming_engine - INFO - [回测] 已处理 100000 根K线
+2026-07-01 20:29:06,120 - backtest.streaming_engine - INFO - [回测] 已处理 150000 根K线
+2026-07-01 20:29:06,524 - backtest.streaming_engine - INFO - [回测] 已处理 200000 根K线
+2026-07-01 20:29:06,888 - backtest.streaming_engine - INFO - [回测] 已处理 250000 根K线
+2026-07-01 20:29:07,248 - backtest.streaming_engine - INFO - [回测] 已处理 300000 根K线
+2026-07-01 20:29:07,591 - backtest.streaming_engine - INFO - [回测] 已处理 350000 根K线
+2026-07-01 20:29:07,922 - backtest.streaming_engine - INFO - [回测] 已处理 400000 根K线
+2026-07-01 20:29:08,257 - backtest.streaming_engine - INFO - [回测] 已处理 450000 根K线
+2026-07-01 20:29:08,583 - backtest.streaming_engine - INFO - [回测] 已处理 500000 根K线
+2026-07-01 20:29:08,907 - backtest.streaming_engine - INFO - [回测] 已处理 550000 根K线
+2026-07-01 20:29:09,243 - backtest.streaming_engine - INFO - [回测] 已处理 600000 根K线
+2026-07-01 20:29:09,566 - backtest.streaming_engine - INFO - [回测] 已处理 650000 根K线
+2026-07-01 20:29:09,865 - backtest.streaming_engine - INFO - [回测] 完成! 总交易: 233346, K线: 698957
+2026-07-01 20:29:09,897 - api.memory_monitor - INFO - [Memory 回测引擎完成] 当前占用: 253.1 MB
+2026-07-01 20:29:09,898 - api.backtest_api - INFO - 回测结果已缓存
+2026-07-01 20:29:09,935 - api.memory_monitor - INFO - 已执行垃圾回收
+2026-07-01 20:29:09,936 - api.memory_monitor - INFO - [Memory 清理后] 当前占用: 253.1 MB
+2026-07-01 20:40:44,563 - api.realtime_kline_api - INFO - 检测到断层: 本地结束=1777605600000, 实时开始=1782909360000, 断层=88395 根K线
+2026-07-01 20:40:44,564 - api.realtime_kline_api - WARNING - 断层太大(88395条)，只填补最近5000条
+2026-07-01 20:40:44,565 - api.realtime_kline_api - INFO - 断层 5000 条，使用分页获取
+2026-07-01 20:40:48,551 - api.realtime_kline_api - INFO - 填补断层区间 1782609300000 ~ 1782909300000, 获取 4995 条数据
+2026-07-01 20:40:48,553 - api.realtime_kline_api - INFO - 成功填补 4995 条断层数据
+2026-07-01 20:40:49,817 - web.app - INFO - WebSocket 启动K线推送线程
+2026-07-01 20:40:50,188 - web.app - INFO - WebSocket 客户端 15PzqyJYJguqzJWrAAAB 订阅 1m K线
+2026-07-01 20:40:57,020 - web.app - INFO - WebSocket 客户端 15PzqyJYJguqzJWrAAAB 取消订阅 1m K线
+2026-07-01 20:40:57,213 - web.app - INFO - WebSocket 客户端已断开: 15PzqyJYJguqzJWrAAAB
+2026-07-01 20:41:00,388 - api.memory_monitor - INFO - [Memory 回测开始] 当前占用: 124.9 MB
+2026-07-01 20:41:00,390 - api.backtest_api - INFO - [回测请求] interval=1m, params={'interval': '1m', 'start_date': '', 'end_date': '', 'mode': 'both', 'stop_loss_pct': 2, 'take_profit_pct': 5, 'initial_capital': 10000, 'fee_rate': 0.05, 'position_mode': 'percent', 'percent_per_trade': 20, 'fixed_amount': 1000, 'max_positions': 3, 'use_stop_profit': True, '_skip_cache': False}
+2026-07-01 20:41:00,391 - api.backtest_api - INFO - [缓存调试] cache_params={"end_date":"","fee_rate":0.05,"fixed_amount":1000,"initial_capital":10000,"interval":"1m","max_positions":3,"mode":"both","percent_per_trade":20,"position_mode":"percent","start_date":"","stop_loss_pct":2,"take_profit_pct":5,"use_stop_profit":true}
+2026-07-01 20:41:00,403 - api.backtest_api - INFO - [回测] DuckDB 不可用，回退到流式引擎
+2026-07-01 20:41:00,412 - backtest.streaming_engine - INFO - [DB选择] 结构库使用 SQLite
+2026-07-01 20:41:02,636 - backtest.streaming_engine - INFO - [流式回测] 加载了 233347 个分型信号
+2026-07-01 20:41:02,637 - backtest.streaming_engine - INFO - ============================================================
+2026-07-01 20:41:02,638 - backtest.streaming_engine - INFO - [回测] 开始 - 资金=10000.0
+2026-07-01 20:41:02,639 - backtest.streaming_engine - INFO - [回测] 使用流式处理，内存占用恒定
+2026-07-01 20:41:02,640 - backtest.streaming_engine - INFO - ============================================================
+2026-07-01 20:41:02,641 - backtest.streaming_engine - INFO - [DB选择] K线库使用 SQLite
+2026-07-01 20:41:02,785 - backtest.streaming_engine - INFO - [回测] 已处理 50000 根K线
+2026-07-01 20:41:02,969 - backtest.streaming_engine - INFO - [回测] 已处理 100000 根K线
+2026-07-01 20:41:03,282 - backtest.streaming_engine - INFO - [回测] 已处理 150000 根K线
+2026-07-01 20:41:03,589 - backtest.streaming_engine - INFO - [回测] 已处理 200000 根K线
+2026-07-01 20:41:03,922 - backtest.streaming_engine - INFO - [回测] 已处理 250000 根K线
+2026-07-01 20:41:04,230 - backtest.streaming_engine - INFO - [回测] 已处理 300000 根K线
+2026-07-01 20:41:04,544 - backtest.streaming_engine - INFO - [回测] 已处理 350000 根K线
+2026-07-01 20:41:04,851 - backtest.streaming_engine - INFO - [回测] 已处理 400000 根K线
+2026-07-01 20:41:05,156 - backtest.streaming_engine - INFO - [回测] 已处理 450000 根K线
+2026-07-01 20:41:05,491 - backtest.streaming_engine - INFO - [回测] 已处理 500000 根K线
+2026-07-01 20:41:05,824 - backtest.streaming_engine - INFO - [回测] 已处理 550000 根K线
+2026-07-01 20:41:06,152 - backtest.streaming_engine - INFO - [回测] 已处理 600000 根K线
+2026-07-01 20:41:06,465 - backtest.streaming_engine - INFO - [回测] 已处理 650000 根K线
+2026-07-01 20:41:06,781 - backtest.streaming_engine - INFO - [回测] 已处理 700000 根K线
+2026-07-01 20:41:07,099 - backtest.streaming_engine - INFO - [回测] 已处理 750000 根K线
+2026-07-01 20:41:07,318 - backtest.streaming_engine - INFO - [回测] 完成! 总交易: 233346, K线: 782957
+2026-07-01 20:41:07,350 - api.memory_monitor - INFO - [Memory 回测引擎完成] 当前占用: 254.7 MB
+2026-07-01 20:41:07,351 - api.backtest_api - INFO - 回测结果已缓存
+2026-07-01 20:41:07,388 - api.memory_monitor - INFO - 已执行垃圾回收
+2026-07-01 20:41:07,390 - api.memory_monitor - INFO - [Memory 清理后] 当前占用: 254.7 MB

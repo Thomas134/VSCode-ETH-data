@@ -1,0 +1,76 @@
+2026-07-01 22:42:54,117 - web.app - INFO - ==================================================
+2026-07-01 22:42:54,117 - web.app - INFO - 后台数据流水线已启动（fetch_range → structure_engine）
+2026-07-01 22:42:54,118 - web.app - INFO - 数据Pipeline启动: Step 1/2 拉取原始K线数据...
+2026-07-01 22:42:54,141 - bybit_client - INFO - Bybit客户端初始化成功 (使用requests)
+2026-07-01 22:42:54,142 - bybit_client - INFO - Bybit客户端初始化成功 (使用requests)
+2026-07-01 22:42:54,142 - bybit_client - INFO - Bybit客户端初始化成功 (使用requests)
+2026-07-01 22:42:54,142 - bybit_client - INFO - Bybit客户端初始化成功 (使用requests)
+2026-07-01 22:42:54,143 - bybit_client - INFO - Bybit客户端初始化成功 (使用requests)
+2026-07-01 22:42:54,143 - bybit_client - INFO - Bybit客户端初始化成功 (使用requests)
+2026-07-01 22:43:22,684 - web.app - INFO - ==================================================
+2026-07-01 22:43:22,684 - web.app - INFO - 后台数据流水线已启动（fetch_range → structure_engine）
+2026-07-01 22:43:22,685 - web.app - INFO - 数据Pipeline启动: Step 1/2 拉取原始K线数据...
+2026-07-01 22:43:22,882 - bybit_client - INFO - Bybit客户端初始化成功 (使用requests)
+2026-07-01 22:43:22,882 - bybit_client - INFO - Bybit客户端初始化成功 (使用requests)
+2026-07-01 22:43:22,882 - bybit_client - INFO - Bybit客户端初始化成功 (使用requests)
+2026-07-01 22:43:22,882 - bybit_client - INFO - Bybit客户端初始化成功 (使用requests)
+2026-07-01 22:43:22,883 - bybit_client - INFO - Bybit客户端初始化成功 (使用requests)
+2026-07-01 22:43:22,883 - bybit_client - INFO - Bybit客户端初始化成功 (使用requests)
+2026-07-01 22:45:05,128 - bybit_client - ERROR - API错误: Too many visits. Exceeded the API Rate Limit.
+2026-07-01 22:45:05,651 - bybit_client - ERROR - API错误: Too many visits. Exceeded the API Rate Limit.
+2026-07-01 22:45:11,980 - web.app - INFO - 数据Pipeline: 原始K线拉取完成
+2026-07-01 22:45:11,980 - web.app - INFO - 数据Pipeline: Step 2/2 全量更新结构K线...
+2026-07-01 22:45:18,613 - web.app - INFO - 数据Pipeline: 结构K线更新完成
+2026-07-01 22:45:18,614 - web.app - INFO - 数据Pipeline全部完成!
+2026-07-01 22:45:18,614 - web.app - INFO - ==================================================
+2026-07-01 22:46:14,284 - api.realtime_kline_api - ERROR - Realtime API 错误: attempt to write a readonly database
+Traceback (most recent call last):
+  File "d:\coding项目\VSCode-ETH-data\web\api\realtime_kline_api.py", line 202, in get_realtime_kline
+    local_klines = get_local_klines_with_fractal(interval, limit)
+  File "d:\coding项目\VSCode-ETH-data\web\api\realtime_kline_api.py", line 32, in get_local_klines_with_fractal
+    conn = get_db_connection()
+  File "d:\coding项目\VSCode-ETH-data\web\api\config.py", line 34, in get_db_connection
+    conn.execute("PRAGMA journal_mode=WAL")
+sqlite3.OperationalError: attempt to write a readonly database
+2026-07-01 22:46:14,287 - api.realtime_kline_api - ERROR - Realtime Fallback 错误: attempt to write a readonly database
+2026-07-01 22:48:30,336 - web.app - INFO - ==================================================
+2026-07-01 22:48:30,336 - web.app - INFO - 后台数据流水线已启动（fetch_range → structure_engine）
+2026-07-01 22:48:30,338 - web.app - INFO - 数据Pipeline启动: Step 1/2 拉取原始K线数据...
+2026-07-01 22:48:30,375 - bybit_client - INFO - Bybit客户端初始化成功 (使用requests)
+2026-07-01 22:48:30,378 - bybit_client - INFO - Bybit客户端初始化成功 (使用requests)
+2026-07-01 22:48:30,378 - bybit_client - INFO - Bybit客户端初始化成功 (使用requests)
+2026-07-01 22:48:30,380 - bybit_client - INFO - Bybit客户端初始化成功 (使用requests)
+2026-07-01 22:48:30,382 - bybit_client - INFO - Bybit客户端初始化成功 (使用requests)
+2026-07-01 22:48:30,383 - bybit_client - INFO - Bybit客户端初始化成功 (使用requests)
+2026-07-01 23:00:04,112 - bybit_client - ERROR - API错误: Too many visits. Exceeded the API Rate Limit.
+2026-07-01 23:00:16,229 - web.app - INFO - 数据Pipeline: 原始K线拉取完成
+2026-07-01 23:00:16,230 - web.app - INFO - 数据Pipeline: Step 2/2 全量更新结构K线...
+2026-07-01 23:00:35,860 - web.app - INFO - 数据Pipeline: 结构K线更新完成
+2026-07-01 23:00:35,861 - web.app - INFO - 数据Pipeline全部完成!
+2026-07-01 23:00:35,862 - web.app - INFO - ==================================================
+2026-07-01 23:01:37,308 - api.memory_monitor - INFO - [Memory 回测开始] 当前占用: 132.6 MB
+2026-07-01 23:01:37,309 - api.backtest_api - INFO - [回测请求] interval=5m, params={'interval': '5m', 'start_date': '', 'end_date': '', 'mode': 'both', 'stop_loss_pct': 2, 'take_profit_pct': 5, 'initial_capital': 10000, 'fee_rate': 0.05, 'position_mode': 'percent', 'percent_per_trade': 20, 'fixed_amount': 1000, 'max_positions': 3, 'use_stop_profit': True, '_skip_cache': False}
+2026-07-01 23:01:37,310 - api.backtest_api - INFO - [缓存调试] cache_params={"end_date":"","fee_rate":0.05,"fixed_amount":1000,"initial_capital":10000,"interval":"5m","max_positions":3,"mode":"both","percent_per_trade":20,"position_mode":"percent","start_date":"","stop_loss_pct":2,"take_profit_pct":5,"use_stop_profit":true}
+2026-07-01 23:01:37,339 - api.backtest_api - INFO - [回测] DuckDB 不可用，回退到流式引擎
+2026-07-01 23:01:37,344 - backtest.streaming_engine - INFO - [DB选择] 结构库使用 SQLite
+2026-07-01 23:01:38,005 - backtest.streaming_engine - INFO - [流式回测] 加载了 90823 个分型信号
+2026-07-01 23:01:38,006 - backtest.streaming_engine - INFO - ============================================================
+2026-07-01 23:01:38,007 - backtest.streaming_engine - INFO - [回测] 开始 - 资金=10000.0
+2026-07-01 23:01:38,007 - backtest.streaming_engine - INFO - [回测] 使用流式处理，内存占用恒定
+2026-07-01 23:01:38,008 - backtest.streaming_engine - INFO - ============================================================
+2026-07-01 23:01:38,008 - backtest.streaming_engine - INFO - [DB选择] K线库使用 SQLite
+2026-07-01 23:01:38,212 - backtest.streaming_engine - INFO - [回测] 已处理 50000 根K线
+2026-07-01 23:01:38,415 - backtest.streaming_engine - INFO - [回测] 已处理 100000 根K线
+2026-07-01 23:01:38,617 - backtest.streaming_engine - INFO - [回测] 已处理 150000 根K线
+2026-07-01 23:01:38,822 - backtest.streaming_engine - INFO - [回测] 已处理 200000 根K线
+2026-07-01 23:01:39,020 - backtest.streaming_engine - INFO - [回测] 已处理 250000 根K线
+2026-07-01 23:01:39,075 - backtest.streaming_engine - INFO - [回测] 完成! 总交易: 90822, K线: 262800
+2026-07-01 23:01:39,086 - api.memory_monitor - INFO - [Memory 回测引擎完成] 当前占用: 176.2 MB
+2026-07-01 23:01:39,087 - api.backtest_api - INFO - 回测结果已缓存
+2026-07-01 23:01:39,124 - api.memory_monitor - INFO - 已执行垃圾回收
+2026-07-01 23:01:39,124 - api.memory_monitor - INFO - [Memory 清理后] 当前占用: 176.2 MB
+2026-07-01 23:02:00,948 - api.realtime_kline_api - INFO - 检测到断层: 本地结束=1782907200000, 实时开始=1782916800000, 断层=31 根K线
+2026-07-01 23:02:01,022 - api.realtime_kline_api - INFO - 填补断层区间 1782907200000 ~ 1782916500000, 获取 32 条数据
+2026-07-01 23:02:01,022 - api.realtime_kline_api - INFO - 成功填补 32 条断层数据
+2026-07-01 23:02:01,660 - web.app - INFO - WebSocket 启动K线推送线程
+2026-07-01 23:02:02,033 - web.app - INFO - WebSocket 客户端 hdpBOjEQqHQOKyPiAAAB 订阅 5m K线

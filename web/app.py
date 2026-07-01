@@ -2,8 +2,10 @@
 # Flask Web 应用入口 - ETH K线展示（支持WebSocket实时推送）
 import gzip
 import os
+import sys
 import threading
 import time
+from pathlib import Path
 from flask import Flask, jsonify, render_template, request
 from flask_socketio import SocketIO, emit
 from api.kline_api import kline_bp
@@ -13,6 +15,10 @@ from api.realtime_kline_api import realtime_bp, get_bybit_latest
 from api.cache_manager import kline_cache
 from api.config import DEFAULT_LIMIT
 from api.logger import setup_logging, get_logger
+
+# 添加 scripts 目录到 sys.path，以便导入数据流水线模块
+SCRIPTS_DIR = Path(__file__).resolve().parent.parent / "bybit_eth_data" / "scripts"
+sys.path.insert(0, str(SCRIPTS_DIR))
 
 # 初始化日志
 setup_logging()
@@ -177,7 +183,37 @@ def start_pusher():
         pusher_thread = socketio.start_background_task(kline_pusher)
         logger.info("WebSocket 启动K线推送线程")
 
+# ── 数据流水线：拉取原始K线 → 全量更新结构K线 ──
+def run_data_pipeline():
+    """后台数据流水线：启动时自动执行 fetch_range → structure_engine"""
+    logger.info("=" * 50)
+    logger.info("数据Pipeline启动: Step 1/2 拉取原始K线数据...")
+    try:
+        from fetch_range import main as fetch_main
+        fetch_main()
+        logger.info("数据Pipeline: 原始K线拉取完成")
+    except Exception as e:
+        logger.error("数据Pipeline: 拉取原始K线失败: %s", e)
+        return
+
+    logger.info("数据Pipeline: Step 2/2 全量更新结构K线...")
+    try:
+        from structure_engine import process_all_intervals
+        process_all_intervals()
+        logger.info("数据Pipeline: 结构K线更新完成")
+    except Exception as e:
+        logger.error("数据Pipeline: 结构K线更新失败: %s", e)
+        return
+
+    logger.info("数据Pipeline全部完成!")
+    logger.info("=" * 50)
+
 # ── 生产入口 ──
 if __name__ == '__main__':
+    # 启动后台数据流水线（daemon线程，不阻塞Web服务启动）
+    pipeline_thread = threading.Thread(target=run_data_pipeline, daemon=True, name="data-pipeline")
+    pipeline_thread.start()
+    logger.info("后台数据流水线已启动（fetch_range → structure_engine）")
+
     port = int(os.environ.get('PORT', 8080))
     socketio.run(app, host='0.0.0.0', port=port, debug=False, allow_unsafe_werkzeug=True)

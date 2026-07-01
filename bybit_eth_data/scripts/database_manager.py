@@ -1,7 +1,11 @@
 # database_manager.py
 import sqlite3
+import threading
 import pandas as pd
-from config import DB_PATH, TIME_INTERVALS, SYMBOL, init_directories
+from bybit_config import DB_PATH, TIME_INTERVALS, SYMBOL, init_directories
+
+# 线程级持久连接：避免每批数据都开关连接
+_tl = threading.local()
 
 def ensure_db_directory():
     """确保数据库文件所在的目录存在"""
@@ -11,16 +15,24 @@ def ensure_db_directory():
         db_parent.mkdir(parents=True, exist_ok=True)
 
 def get_db_connection():
-    """创建并返回一个数据库连接"""
+    """创建并返回一个数据库连接（写入优化）"""
     ensure_db_directory()
     try:
         conn = sqlite3.connect(str(DB_PATH))
-        # 启用外键约束
-        conn.execute("PRAGMA foreign_keys = ON")
+        conn.execute("PRAGMA journal_mode=WAL")
+        conn.execute("PRAGMA synchronous=NORMAL")
+        conn.execute("PRAGMA cache_size=-20000")  # 80MB 缓存
+        conn.execute("PRAGMA foreign_keys=ON")
         return conn
     except Exception as e:
         print(f"连接数据库失败: {e}")
         raise
+
+def get_thread_connection():
+    """获取当前线程的持久数据库连接（复用，避免重复开关）"""
+    if not hasattr(_tl, 'conn') or _tl.conn is None:
+        _tl.conn = get_db_connection()
+    return _tl.conn
 
 def init_database():
     """初始化数据库，创建所有时间级别的K线数据表"""
@@ -78,7 +90,7 @@ def init_database():
 
 def insert_or_update_kline_data(df, interval_key):
     """
-    插入或更新指定时间级别的K线数据
+    插入或更新指定时间级别的K线数据（批量优化版）
     
     Args:
         df: 包含K线数据的DataFrame
@@ -91,43 +103,45 @@ def insert_or_update_kline_data(df, interval_key):
         print(f"✗ 未知的时间级别: {interval_key}")
         return 0, 0
     
+    if df.empty:
+        return 0, 0
+    
     table_name = TIME_INTERVALS[interval_key]["table_name"]
-    conn = get_db_connection()
-    inserted_count = 0
+    conn = get_thread_connection()
     
     try:
         cursor = conn.cursor()
         
-        for index, row in df.iterrows():
-            try:
-                # 尝试插入新记录
-                insert_sql = f"""
-                INSERT OR IGNORE INTO {table_name} 
-                (symbol, interval, open_time, open, high, low, close, volume, trade_count, taker_buy_volume)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-                """
-                cursor.execute(insert_sql, (
-                    row['symbol'], row['interval'], row['open_time'],
-                    row['open'], row['high'], row['low'], row['close'],
-                    row['volume'], row.get('trade_count', 0), row.get('taker_buy_volume', 0)
-                ))
-                
-                if cursor.rowcount > 0:
-                    inserted_count += 1
-                    
-            except Exception as e:
-                print(f"插入数据时出错 (行 {index}): {e}")
-                continue
+        # 构建批量数据列表
+        rows = [
+            (
+                str(row['symbol']), str(row['interval']), int(row['open_time']),
+                float(row['open']), float(row['high']), float(row['low']),
+                float(row['close']), float(row['volume']),
+                int(row.get('trade_count', 0)), float(row.get('taker_buy_volume', 0))
+            )
+            for _, row in df.iterrows()
+        ]
+        
+        insert_sql = f"""
+        INSERT OR IGNORE INTO {table_name} 
+        (symbol, interval, open_time, open, high, low, close, volume, trade_count, taker_buy_volume)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        """
+        cursor.executemany(insert_sql, rows)
+        inserted_count = cursor.rowcount
         
         conn.commit()
-        skipped_count = len(df) - inserted_count
-        print(f"✓ {TIME_INTERVALS[interval_key]['description']}数据插入完成: 新增 {inserted_count} 条, 跳过 {skipped_count} 条重复数据")
+        
+        skipped = len(rows) - inserted_count
+        if skipped > 0:
+            print(f"  [{interval_key}] 批量写入: 新增 {inserted_count} 条, 跳过 {skipped} 条重复")
         
     except Exception as e:
         print(f"批量插入数据时出错: {e}")
         conn.rollback()
-    finally:
-        conn.close()
+        inserted_count = 0
+        skipped = 0
     
     return inserted_count, 0
 
