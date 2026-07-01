@@ -442,7 +442,8 @@ def get_structure_stats():
                 'min_time': row['min_time'],
                 'max_time': row['max_time'],
             }
-        except:
+        except sqlite3.Error as e:
+            print(f"[Stats Query Error] {interval}: {e}")
             stats[interval] = {'count': 0, 'min_time': None, 'max_time': None}
     
     conn.close()

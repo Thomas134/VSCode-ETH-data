@@ -301,8 +301,9 @@ def get_realtime_kline():
                 "source": "local_fallback",
                 "error": str(e)
             })
-        except:
-            return jsonify({"error": str(e)}), 500
+        except Exception as e2:
+            print(f"[Realtime Fallback Error] {e2}")
+            return jsonify({"error": str(e2)}), 500
 
 
 def build_fractal_regions(klines, interval):

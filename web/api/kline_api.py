@@ -171,8 +171,8 @@ def get_kline():
                     })
                 
                 struct_conn.close()
-            except:
-                pass
+            except sqlite3.Error as e:
+                print(f"[Fractal Query Error] {e}")
         
         conn.close()
         
