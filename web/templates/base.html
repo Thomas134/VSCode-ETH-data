@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}{% endblock %}</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <script src="https://unpkg.com/lightweight-charts@4.1.0/dist/lightweight-charts.standalone.production.js"></script>
+    {% block extra_head %}{% endblock %}
+</head>
+<body>
+    <div class="container">
+        <!-- 顶部标题栏 -->
+        <header class="header">
+            <div class="symbol-info">
+                <span class="symbol-name">ETHUSDT</span>
+                {% block header_extra %}{% endblock %}
+                <div class="price-container">
+                    <span class="price" id="current-price">--</span>
+                    <span class="change" id="price-change">
+                        <span class="change-indicator"></span>
+                        <span id="price-change-text">--</span>
+                    </span>
+                </div>
+            </div>
+            <!-- OHLC 信息显示 -->
+            <div class="ohlc-info" id="ohlc-info">
+                <span class="ohlc-item"><b>时间:</b> <span id="ohlc-time">--</span></span>
+                <span class="ohlc-item"><b>O:</b> <span id="ohlc-open">--</span></span>
+                <span class="ohlc-item"><b>H:</b> <span id="ohlc-high">--</span></span>
+                <span class="ohlc-item"><b>L:</b> <span id="ohlc-low">--</span></span>
+                <span class="ohlc-item"><b>C:</b> <span id="ohlc-close">--</span></span>
+                <span class="ohlc-item"><b>Vol:</b> <span id="ohlc-volume">--</span></span>
+                {% block ohlc_extra %}{% endblock %}
+            </div>
+        </header>
+
+        <!-- 主体区域 -->
+        <div class="main-content">
+            <!-- 左侧时间周期选择 -->
+            <aside class="sidebar">
+                <!-- 导航按钮 -->
+                <div class="nav-buttons">
+                    <a href="/" class="nav-btn{% block nav_index_class %}{% endblock %}">原始K线</a>
+                    <a href="/structure" class="nav-btn{% block nav_structure_class %}{% endblock %}">结构K线</a>
+                </div>
+
+                {% block sidebar_content %}{% endblock %}
+            </aside>
+
+            <!-- K线图区域 -->
+            <main class="chart-area">
+                <div id="chart-container"></div>
+            </main>
+        </div>
+
+        <!-- 底部状态栏 -->
+        <footer class="footer">
+            {% block footer_left %}{% endblock %}
+            <span id="status">就绪</span>
+            <span id="data-time">--</span>
+        </footer>
+    </div>
+
+    {% block modal %}{% endblock %}
+
+    <script>const DEFAULT_LIMIT = {{ config.DEFAULT_LIMIT }};</script>
+    <script type="importmap">
+    {
+      "imports": {
+        "utils/": "/static/js/utils/"
+      }
+    }
+    </script>
+    {% block scripts %}{% endblock %}
+</body>
+</html>
