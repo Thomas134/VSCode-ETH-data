@@ -3,17 +3,11 @@ from flask import Blueprint, jsonify, request
 import sqlite3
 from .config import (
     STRUCTURE_DB, SOURCE_DB, STRUCTURE_TABLE_MAP,
-    DEFAULT_LIMIT
+    DEFAULT_LIMIT,
+    get_structure_connection,
 )
 
 structure_bp = Blueprint('structure', __name__)
-
-
-def get_structure_connection():
-    """获取结构数据库连接"""
-    conn = sqlite3.connect(str(STRUCTURE_DB))
-    conn.row_factory = sqlite3.Row
-    return conn
 
 
 def get_source_connection():

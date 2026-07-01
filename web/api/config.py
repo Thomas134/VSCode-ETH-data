@@ -19,6 +19,7 @@ def get_db_connection():
     conn.execute("PRAGMA journal_mode=WAL")
     conn.execute("PRAGMA synchronous=NORMAL")
     conn.execute("PRAGMA cache_size=5000")  # 减小到 20MB，避免内存过大
+    conn.row_factory = sqlite3.Row
     return conn
 
 def get_structure_connection():
@@ -27,6 +28,7 @@ def get_structure_connection():
     conn.execute("PRAGMA journal_mode=WAL")
     conn.execute("PRAGMA synchronous=NORMAL")
     conn.execute("PRAGMA cache_size=5000")  # 减小缓存
+    conn.row_factory = sqlite3.Row
     return conn
 
 # ── 项目根目录 ──
@@ -84,4 +86,3 @@ INTERVAL_MS = {
 # ── 默认参数 ──
 DEFAULT_SYMBOL = "ETHUSDT"
 DEFAULT_LIMIT = 500
-

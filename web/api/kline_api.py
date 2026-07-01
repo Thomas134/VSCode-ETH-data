@@ -2,35 +2,17 @@
 # K线数据 API - 只读访问数据库
 import bisect
 import datetime
-import sqlite3
 from flask import Blueprint, jsonify, request
 from .config import (
     BASE_DIR, DB_PATH, STRUCTURE_DB,
     KLINE_TABLE_MAP, FRACTAL_TABLE_MAP, INTERVAL_MS,
-    DEFAULT_LIMIT
+    DEFAULT_LIMIT,
+    get_db_connection, get_structure_connection,
 )
 from .cache_manager import kline_cache
 from .json_profiler import JSONProfiler  # JSON性能测试（可随时注释掉）
 
 kline_bp = Blueprint('kline', __name__)
-
-def get_db_connection():
-    """获取只读数据库连接（启用WAL模式优化并发）"""
-    conn = sqlite3.connect(f"file:{DB_PATH}?mode=ro", uri=True)
-    conn.execute("PRAGMA journal_mode=WAL")
-    conn.execute("PRAGMA synchronous=NORMAL")
-    conn.execute("PRAGMA cache_size=10000")
-    conn.row_factory = sqlite3.Row
-    return conn
-
-def get_structure_connection():
-    """获取结构数据库连接（启用WAL模式优化并发）"""
-    conn = sqlite3.connect(f"file:{STRUCTURE_DB}?mode=ro", uri=True)
-    conn.execute("PRAGMA journal_mode=WAL")
-    conn.execute("PRAGMA synchronous=NORMAL")
-    conn.execute("PRAGMA cache_size=10000")
-    conn.row_factory = sqlite3.Row
-    return conn
 
 def _match_fractals_scanline(rows, fractal_ranges):
     """

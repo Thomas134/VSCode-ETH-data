@@ -4,7 +4,6 @@
 """
 import sys
 from pathlib import Path
-import sqlite3
 
 # 添加路径导入现有模块
 sys.path.insert(0, str(Path(__file__).parent.parent.parent / "bybit_eth_data" / "scripts"))
@@ -12,27 +11,13 @@ sys.path.insert(0, str(Path(__file__).parent.parent.parent / "bybit_eth_data" / 
 from flask import Blueprint, jsonify, request
 from bybit_client import BybitClient
 from structure_analyzer import process_containing_relationship, identify_fractals
-from .config import DB_PATH, STRUCTURE_DB, KLINE_TABLE_MAP, FRACTAL_TABLE_MAP, INTERVAL_MS
+from .config import DB_PATH, STRUCTURE_DB, KLINE_TABLE_MAP, FRACTAL_TABLE_MAP, INTERVAL_MS, get_db_connection, get_structure_connection
 
 realtime_bp = Blueprint('realtime_kline', __name__)
 bybit_client = BybitClient()
 
 # Bybit时间级别映射
 BYBIT_INTERVAL = {'1m': '1', '5m': '5', '15m': '15', '1h': '60', '4h': '240', '1d': 'D'}
-
-
-def get_db_connection():
-    """获取源数据库连接"""
-    conn = sqlite3.connect(f"file:{DB_PATH}?mode=ro", uri=True)
-    conn.row_factory = sqlite3.Row
-    return conn
-
-
-def get_structure_connection():
-    """获取结构数据库连接"""
-    conn = sqlite3.connect(f"file:{STRUCTURE_DB}?mode=ro", uri=True)
-    conn.row_factory = sqlite3.Row
-    return conn
 
 
 def get_local_klines_with_fractal(interval, limit=500):
