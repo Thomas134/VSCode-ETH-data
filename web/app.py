@@ -12,6 +12,11 @@ from api.backtest_api import backtest_bp
 from api.realtime_kline_api import realtime_bp, get_bybit_latest
 from api.cache_manager import kline_cache
 from api.config import DEFAULT_LIMIT
+from api.logger import setup_logging, get_logger
+
+# 初始化日志
+setup_logging()
+logger = get_logger("web.app")
 
 app = Flask(__name__)
 app.register_blueprint(kline_bp)
@@ -52,17 +57,17 @@ def clear_cache():
 # ── WebSocket 事件处理 ──
 @socketio.on('connect')
 def handle_connect():
-    print('[WebSocket] 客户端已连接')
+    logger.info("WebSocket 客户端已连接")
 
 @socketio.on('disconnect')
 def handle_disconnect():
-    print('[WebSocket] 客户端已断开')
+    logger.info("WebSocket 客户端已断开")
 
 @socketio.on('subscribe_kline')
 def handle_subscribe_kline(data):
     """客户端订阅K线实时推送"""
     interval = data.get('interval', '1m')
-    print(f'[WebSocket] 客户端订阅 {interval} K线')
+    logger.info("WebSocket 客户端订阅 %s K线", interval)
     
     # 立即发送一次当前最新数据
     latest_klines = get_bybit_latest(interval, limit=1)
@@ -128,10 +133,10 @@ def kline_pusher():
                             'is_new': False
                         })
                 except Exception as e:
-                    print(f'[Kline Pusher Error] {interval}: {e}')
-                    
+                    logger.error("Kline Pusher Error [%s]: %s", interval, e)
+
         except Exception as e:
-            print(f'[Kline Pusher Error] {e}')
+            logger.error("Kline Pusher Error: %s", e)
             time.sleep(5)  # 出错后等待5秒再重试
 
 # ── 启动后台推送线程 ──
@@ -142,7 +147,7 @@ def start_pusher():
     global pusher_thread
     if pusher_thread is None or not pusher_thread.is_alive():
         pusher_thread = socketio.start_background_task(kline_pusher)
-        print('[WebSocket] 启动K线推送线程')
+        logger.info("WebSocket 启动K线推送线程")
 
 # ── 生产入口 ──
 if __name__ == '__main__':

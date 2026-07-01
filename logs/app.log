@@ -1,0 +1,8 @@
+2026-07-01 12:01:08,587 - web.app - INFO - WebSocket 启动K线推送线程
+2026-07-01 12:01:08,960 - web.app - INFO - WebSocket 客户端订阅 1m K线
+2026-07-01 12:01:15,342 - web.app - INFO - WebSocket 客户端已断开
+2026-07-01 12:01:56,935 - web.app - INFO - WebSocket 启动K线推送线程
+2026-07-01 12:01:57,324 - web.app - INFO - WebSocket 客户端订阅 15m K线
+2026-07-01 12:02:01,168 - web.app - INFO - WebSocket 客户端已断开
+2026-07-01 12:02:02,010 - web.app - INFO - WebSocket 客户端订阅 1m K线
+2026-07-01 12:02:20,350 - web.app - INFO - WebSocket 客户端已断开
