@@ -79,6 +79,13 @@
     </div>
     
     <script>const DEFAULT_LIMIT = {{ config.DEFAULT_LIMIT }};</script>
-    <script src="/static/js/structure_chart.js"></script>
+    <script type="importmap">
+    {
+      "imports": {
+        "utils/": "/static/js/utils/"
+      }
+    }
+    </script>
+    <script type="module" src="/static/js/structure_chart.js"></script>
 </body>
 </html>

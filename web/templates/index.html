@@ -249,7 +249,14 @@
     
     <script src="/static/js/utils/validators.js"></script>
     <script>const DEFAULT_LIMIT = {{ config.DEFAULT_LIMIT }};</script>
-    <script src="/static/js/chart.js"></script>
+    <script type="importmap">
+    {
+      "imports": {
+        "utils/": "/static/js/utils/"
+      }
+    }
+    </script>
+    <script type="module" src="/static/js/chart.js"></script>
     <script src="/static/js/realtime_kline.js"></script>
 </body>
 </html>

@@ -2,6 +2,9 @@
 // 使用 TradingView Lightweight Charts
 // 显示标准化K线（包含关系处理后）
 
+import { setStatus, updatePriceDisplay, updateDataTime } from 'utils/dom.js';
+import { formatVolume } from 'utils/format.js';
+
 let priceChart = null;
 let volumeChart = null;
 let candlestickSeries = null;
@@ -201,67 +204,35 @@ function initChart() {
     });
 }
 
-// 更新价格显示 (Bybit 风格)
-function updatePriceDisplay(data) {
-    const priceEl = document.getElementById('current-price');
-    const changeEl = document.getElementById('price-change');
-    const changeTextEl = document.getElementById('price-change-text');
-    
-    if (data && data.close) {
-        priceEl.textContent = data.close.toFixed(2);
-        
-        const change = ((data.close - data.open) / data.open * 100);
-        const changeText = change >= 0 ? `+${change.toFixed(2)}%` : `${change.toFixed(2)}%`;
-        changeTextEl.textContent = changeText;
-        
-        if (change >= 0) {
-            priceEl.style.color = '#0ecb81';
-            changeEl.className = 'change';
-        } else {
-            priceEl.style.color = '#f6465d';
-            changeEl.className = 'change negative';
+// structure_chart.js 特有的 OHLC 扩展：显示合并K线数
+function updateOHLCDisplay(time, data) {
+    const timeStr = formatDateTime(time);
+
+    const timeEl = document.getElementById('ohlc-time');
+    const openEl = document.getElementById('ohlc-open');
+    const highEl = document.getElementById('ohlc-high');
+    const lowEl = document.getElementById('ohlc-low');
+    const closeEl = document.getElementById('ohlc-close');
+    const volEl = document.getElementById('ohlc-volume');
+
+    if (timeEl) timeEl.textContent = timeStr;
+    if (openEl) openEl.textContent = data.open ? data.open.toFixed(2) : '--';
+    if (highEl) highEl.textContent = data.high ? data.high.toFixed(2) : '--';
+    if (lowEl) lowEl.textContent = data.low ? data.low.toFixed(2) : '--';
+    if (closeEl) closeEl.textContent = data.close ? data.close.toFixed(2) : '--';
+
+    if (volEl) {
+        const volumeItem = allVolumeData.find(v => v.time === time);
+        if (volumeItem) {
+            volEl.textContent = formatVolume(volumeItem.value);
         }
     }
-}
 
-// 更新OHLC信息显示（包含source_count）
-function updateOHLCDisplay(time, data) {
-    const date = new Date(time * 1000);
-    const timeStr = date.toLocaleString('zh-CN', {
-        year: 'numeric',
-        month: '2-digit',
-        day: '2-digit',
-        hour: '2-digit',
-        minute: '2-digit'
-    });
-    
-    document.getElementById('ohlc-time').textContent = timeStr;
-    document.getElementById('ohlc-open').textContent = data.open ? data.open.toFixed(2) : '--';
-    document.getElementById('ohlc-high').textContent = data.high ? data.high.toFixed(2) : '--';
-    document.getElementById('ohlc-low').textContent = data.low ? data.low.toFixed(2) : '--';
-    document.getElementById('ohlc-close').textContent = data.close ? data.close.toFixed(2) : '--';
-    
-    // 获取对应的成交量和source_count
-    const volumeItem = allVolumeData.find(v => v.time === time);
-    if (volumeItem) {
-        document.getElementById('ohlc-volume').textContent = formatVolume(volumeItem.value);
-    }
-    
-    // 显示合并K线数
+    // 显示合并K线数（structure_chart 特有）
     const sourceCountEl = document.getElementById('ohlc-source-count');
     if (sourceCountEl && data.source_count) {
         sourceCountEl.textContent = data.source_count;
     }
-}
-
-// 格式化成交量
-function formatVolume(vol) {
-    if (vol >= 1000000) {
-        return (vol / 1000000).toFixed(2) + 'M';
-    } else if (vol >= 1000) {
-        return (vol / 1000).toFixed(2) + 'K';
-    }
-    return vol.toFixed(2);
 }
 
 // 加载结构K线数据 (初始加载)
@@ -463,40 +434,7 @@ async function loadStats() {
     }
 }
 
-// 设置状态 (带图标)
-function setStatus(text) {
-    const el = document.getElementById('status');
-    const raw = text;
-    if (raw.startsWith('✔')) {
-        el.textContent = raw;
-        el.className = '';
-    } else if (raw.includes('错误') || raw.includes('失败') || raw.startsWith('❌')) {
-        el.innerHTML = '✖ ' + raw.replace(/[❌✖]/g, '').trim();
-        el.className = 'error';
-    } else if (raw.includes('加载') || raw.includes('叠加')) {
-        el.innerHTML = '⟳ ' + raw;
-        el.className = 'loading';
-    } else if (raw.startsWith('✅')) {
-        el.innerHTML = '✔ ' + raw.replace(/[✅]/g, '').trim();
-        el.className = '';
-    } else {
-        el.textContent = raw;
-        el.className = '';
-    }
-}
 
-// 更新数据时间
-function updateDataTime(timestamp) {
-    const date = new Date(timestamp * 1000);
-    const timeStr = date.toLocaleString('zh-CN', {
-        year: 'numeric',
-        month: '2-digit',
-        day: '2-digit',
-        hour: '2-digit',
-        minute: '2-digit',
-    });
-    document.getElementById('data-time').textContent = `最新: ${timeStr}`;
-}
 
 // 切换时间周期
 function switchInterval(interval) {

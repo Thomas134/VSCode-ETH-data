@@ -2,6 +2,8 @@
 // 使用 TradingView Lightweight Charts
 // 主图(K线 70%) + 副图(成交量 30%)
 
+import { setStatus, updatePriceDisplay, updateOHLCDisplay, updateDataTime } from 'utils/dom.js';
+
 // 防止 debug 模式热重载导致重复加载
 if (typeof window.__chartJsLoaded !== 'undefined') {
     console.warn('[chart.js] 已加载，跳过');
@@ -197,62 +199,7 @@ function initChart() {
     });
 }
 
-// 更新价格显示 (Bybit 风格)
-function updatePriceDisplay(data) {
-    const priceEl = document.getElementById('current-price');
-    const changeEl = document.getElementById('price-change');
-    const changeTextEl = document.getElementById('price-change-text');
-    
-    if (data && data.close) {
-        priceEl.textContent = data.close.toFixed(2);
-        
-        const change = ((data.close - data.open) / data.open * 100);
-        const changeText = change >= 0 ? `+${change.toFixed(2)}%` : `${change.toFixed(2)}%`;
-        changeTextEl.textContent = changeText;
-        
-        if (change >= 0) {
-            priceEl.style.color = '#0ecb81';
-            changeEl.className = 'change';
-        } else {
-            priceEl.style.color = '#f6465d';
-            changeEl.className = 'change negative';
-        }
-    }
-}
 
-// 更新OHLC信息显示
-function updateOHLCDisplay(time, data) {
-    const date = new Date(time * 1000);
-    const timeStr = date.toLocaleString('zh-CN', {
-        year: 'numeric',
-        month: '2-digit',
-        day: '2-digit',
-        hour: '2-digit',
-        minute: '2-digit'
-    });
-    
-    document.getElementById('ohlc-time').textContent = timeStr;
-    document.getElementById('ohlc-open').textContent = data.open ? data.open.toFixed(2) : '--';
-    document.getElementById('ohlc-high').textContent = data.high ? data.high.toFixed(2) : '--';
-    document.getElementById('ohlc-low').textContent = data.low ? data.low.toFixed(2) : '--';
-    document.getElementById('ohlc-close').textContent = data.close ? data.close.toFixed(2) : '--';
-    
-    // 获取对应的成交量
-    const volumeItem = allVolumeData.find(v => v.time === time);
-    if (volumeItem) {
-        document.getElementById('ohlc-volume').textContent = formatVolume(volumeItem.value);
-    }
-}
-
-// 格式化成交量
-function formatVolume(vol) {
-    if (vol >= 1000000) {
-        return (vol / 1000000).toFixed(2) + 'M';
-    } else if (vol >= 1000) {
-        return (vol / 1000).toFixed(2) + 'K';
-    }
-    return vol.toFixed(2);
-}
 
 // 加载K线数据 (初始加载)
 async function loadKlineData(interval, limit = DEFAULT_LIMIT) {
@@ -462,39 +409,7 @@ async function loadStats() {
     }
 }
 
-// 设置状态 (带图标)
-function setStatus(text) {
-    const el = document.getElementById('status');
-    if (text.startsWith('✔')) {
-        el.textContent = text;
-        el.className = '';
-    } else if (text.startsWith('错误') || text.includes('失败') || text.startsWith('❌')) {
-        el.innerHTML = '✖ ' + text.replace(/[❌✖]/g, '').trim();
-        el.className = 'error';
-    } else if (text.startsWith('⏳') || text.includes('加载中') || text.includes('加载历史')) {
-        el.innerHTML = '⟳ ' + text.replace(/[⏳]/g, '').trim();
-        el.className = 'loading';
-    } else if (text.startsWith('✅')) {
-        el.innerHTML = '✔ ' + text.replace(/[✅]/g, '').trim();
-        el.className = '';
-    } else {
-        el.textContent = text;
-        el.className = '';
-    }
-}
 
-// 更新数据时间
-function updateDataTime(timestamp) {
-    const date = new Date(timestamp * 1000);
-    const timeStr = date.toLocaleString('zh-CN', {
-        year: 'numeric',
-        month: '2-digit',
-        day: '2-digit',
-        hour: '2-digit',
-        minute: '2-digit',
-    });
-    document.getElementById('data-time').textContent = `最新: ${timeStr}`;
-}
 
 // 切换时间周期
 function switchInterval(interval) {
@@ -1216,6 +1131,8 @@ window.loadKlineData = loadKlineData;
 window.setStatus = setStatus;
 window.updatePriceDisplay = updatePriceDisplay;
 window.updateDataTime = updateDataTime;
+window.updateOHLCDisplay = updateOHLCDisplay;
+window.formatVolume = formatVolume;
 
 // 在 DOMContentLoaded 中追加
 document.addEventListener('DOMContentLoaded', () => {
