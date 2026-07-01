@@ -1,5 +1,6 @@
 """
 流式回测引擎 - 内存占用恒定，不存储全部K线
+阶段2：优先 DuckDB，自动回退 SQLite
 """
 import logging
 import sys
@@ -9,12 +10,45 @@ from pathlib import Path
 
 # 添加config路径
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "api"))
-from config import DB_PATH, STRUCTURE_DB, KLINE_TABLE_MAP, FRACTAL_TABLE_MAP, INTERVAL_MS
+from config import (
+    DB_PATH, STRUCTURE_DB,
+    KLINE_TABLE_MAP, FRACTAL_TABLE_MAP, INTERVAL_MS,
+    get_duckdb_kline_connection, get_duckdb_structure_connection,
+    DUCKDB_AVAILABLE
+)
 
 logger = logging.getLogger(__name__)
 
 def log(msg):
     logger.info(msg)
+
+
+# ── 自动选择数据库连接（优先 DuckDB） ──
+def _get_kline_conn():
+    """获取K线库连接：优先 DuckDB，否则 SQLite"""
+    if DUCKDB_AVAILABLE:
+        try:
+            conn = get_duckdb_kline_connection(read_only=True)
+            log("[DB选择] K线库使用 DuckDB")
+            return conn, "duckdb"
+        except Exception as e:
+            log(f"[DB选择] DuckDB K线库连接失败: {e}，回退到 SQLite")
+    log("[DB选择] K线库使用 SQLite")
+    return sqlite3.connect(f"file:{DB_PATH}?mode=ro", uri=True), "sqlite"
+
+def _get_structure_conn():
+    """获取结构库连接：优先 DuckDB，否则 SQLite"""
+    if DUCKDB_AVAILABLE:
+        try:
+            conn = get_duckdb_structure_connection(read_only=True)
+            log("[DB选择] 结构库使用 DuckDB")
+            return conn, "duckdb"
+        except Exception as e:
+            log(f"[DB选择] DuckDB 结构库连接失败: {e}，回退到 SQLite")
+    log("[DB选择] 结构库使用 SQLite")
+    conn = sqlite3.connect(f"file:{STRUCTURE_DB}?mode=ro", uri=True)
+    conn.row_factory = sqlite3.Row
+    return conn, "sqlite"
 
 
 class StreamingBacktestEngine:
@@ -88,7 +122,7 @@ class StreamingBacktestEngine:
         return self._build_result(total_rows)
     
     def _iter_klines(self, interval: str, start_date: str, end_date: str):
-        """流式生成K线数据"""
+        """流式生成K线数据 - 优先 DuckDB，自动回退 SQLite"""
         import datetime
         
         table_name = KLINE_TABLE_MAP.get(interval, "kline_1m")
@@ -102,10 +136,8 @@ class StreamingBacktestEngine:
             dt = datetime.datetime.strptime(end_date, "%Y-%m-%d")
             end_ms = int(dt.timestamp() * 1000)
         
-        # 使用连接池复用连接（避免重复connect开销）
-        from api.config import get_db_connection
-        conn = get_db_connection()
-        cursor = conn.cursor()
+        # 优先 DuckDB，失败自动回退 SQLite
+        conn, db_type = _get_kline_conn()
         
         conditions = ["open_time IS NOT NULL"]
         params = []
@@ -117,23 +149,35 @@ class StreamingBacktestEngine:
             params.append(end_ms)
         where = " AND ".join(conditions)
         
-        cursor.execute(f"""
+        sql = f"""
         SELECT open_time, close
         FROM {table_name}
         WHERE {where}
         ORDER BY open_time ASC
-        """, params)
+        """
         
-        for row in cursor:
-            yield (
-                int(row[0]) // 1000,   # time
-                float(row[1]),          # close
-            )
+        if db_type == "duckdb":
+            # DuckDB：单次查询，直接迭代结果（和 SQLite 逻辑一致）
+            result = conn.execute(sql, params)
+            for row in result.fetchall():
+                yield (
+                    int(row[0]) // 1000,
+                    float(row[1]),
+                )
+        else:
+            # SQLite：逐条迭代（原有逻辑）
+            cursor = conn.cursor()
+            cursor.execute(sql, params)
+            for row in cursor:
+                yield (
+                    int(row[0]) // 1000,
+                    float(row[1]),
+                )
         
-        conn.close()  # 关闭连接释放内存
+        conn.close()
     
     def _load_fractal_signals(self, interval: str, start_date: str, end_date: str) -> dict:
-        """加载分型信号"""
+        """加载分型信号 - 优先 DuckDB，自动回退 SQLite"""
         import datetime
         
         std_table = FRACTAL_TABLE_MAP.get(interval, "kline_1m_std")
@@ -148,20 +192,17 @@ class StreamingBacktestEngine:
             dt = datetime.datetime.strptime(end_date, "%Y-%m-%d")
             end_ms = int(dt.timestamp() * 1000)
         
-        from api.config import get_structure_connection
-        conn = get_structure_connection()
-        cursor = conn.cursor()
+        # 优先 DuckDB，失败自动回退 SQLite
+        conn, db_type = _get_structure_conn()
         
         # 获取所有行用于计算confirm_time
-        cursor.execute(f"""
+        all_sql = f"""
         SELECT start_time, end_time
         FROM {std_table}
         WHERE start_time >= ? AND start_time < ?
         ORDER BY start_time ASC
-        """, (start_ms or 0, end_ms or 9999999999999))
-        
-        all_rows = list(cursor)
-        time_to_idx = {row[0]: i for i, row in enumerate(all_rows)}
+        """
+        all_params = (start_ms or 0, end_ms or 9999999999999)
         
         # 获取分型行
         conditions = ["fractal_label != 0"]
@@ -174,25 +215,52 @@ class StreamingBacktestEngine:
             params.append(end_ms)
         where = " AND ".join(conditions)
         
-        cursor.execute(f"""
+        fractal_sql = f"""
         SELECT start_time, end_time, fractal_label
         FROM {std_table}
         WHERE {where}
         ORDER BY start_time ASC
-        """, params)
+        """
         
-        trigger_map = {}
-        for row in cursor:
-            start_time, end_time, label = row
-            idx = time_to_idx.get(start_time)
-            if idx is not None and idx + 1 < len(all_rows):
-                confirm_time_ms = all_rows[idx + 1][1] - interval_ms
-                trigger_map[confirm_time_ms // 1000] = label
-            else:
-                confirm_time_ms = end_time - interval_ms
-                trigger_map[confirm_time_ms // 1000] = label
+        if db_type == "duckdb":
+            # DuckDB：用 DataFrame 处理
+            all_df = conn.execute(all_sql, all_params).fetchdf()
+            time_to_idx = {row['start_time']: i for i, row in all_df.iterrows()}
+            all_rows = list(all_df.itertuples(index=False))
+            
+            fractal_df = conn.execute(fractal_sql, params).fetchdf()
+            trigger_map = {}
+            for _, row in fractal_df.iterrows():
+                start_time = row['start_time']
+                end_time = row['end_time']
+                label = row['fractal_label']
+                idx = time_to_idx.get(start_time)
+                if idx is not None and idx + 1 < len(all_rows):
+                    confirm_time_ms = all_rows[idx + 1][1] - interval_ms
+                    trigger_map[confirm_time_ms // 1000] = label
+                else:
+                    confirm_time_ms = end_time - interval_ms
+                    trigger_map[confirm_time_ms // 1000] = label
+        else:
+            # SQLite：原有逻辑
+            cursor = conn.cursor()
+            cursor.execute(all_sql, all_params)
+            all_rows = list(cursor)
+            time_to_idx = {row[0]: i for i, row in enumerate(all_rows)}
+            
+            cursor.execute(fractal_sql, params)
+            trigger_map = {}
+            for row in cursor:
+                start_time, end_time, label = row
+                idx = time_to_idx.get(start_time)
+                if idx is not None and idx + 1 < len(all_rows):
+                    confirm_time_ms = all_rows[idx + 1][1] - interval_ms
+                    trigger_map[confirm_time_ms // 1000] = label
+                else:
+                    confirm_time_ms = end_time - interval_ms
+                    trigger_map[confirm_time_ms // 1000] = label
         
-        conn.close()  # 关闭连接释放内存
+        conn.close()
         return trigger_map
     
     def _record_equity(self, current_price: float, current_time: int):

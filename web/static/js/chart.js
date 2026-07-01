@@ -310,7 +310,7 @@ async function loadMoreHistory() {
     
     try {
         const response = await fetch(
-            `/api/kline?interval=${currentInterval}&limit=${DEFAULT_LIMIT}&before=${earliestTime}`
+            `/api/kline?interval=${window.currentInterval}&limit=${DEFAULT_LIMIT}&before=${earliestTime}`
         );
         if (!response.ok) {
             throw new Error('API请求失败');
@@ -413,9 +413,14 @@ async function loadStats() {
 
 // 切换时间周期
 function switchInterval(interval) {
-    if (interval === window.currentInterval) return;
+    console.log('[前端调试] switchInterval called:', interval, 'current:', window.currentInterval);
+    if (interval === window.currentInterval) {
+        console.log('[前端调试] same interval, skip');
+        return;
+    }
     
     window.currentInterval = interval;
+    console.log('[前端调试] currentInterval updated to:', window.currentInterval);
     
     // 更新按钮状态
     document.querySelectorAll('.interval-btn').forEach(btn => {
@@ -527,7 +532,7 @@ function updateCacheStatus(status) {
 // 获取当前回测参数（用于缓存key）
 function getBacktestParams() {
     return {
-        interval: currentInterval,
+        interval: window.currentInterval,
         start_date: document.getElementById('bt-start-date').value || '',
         end_date: document.getElementById('bt-end-date').value || '',
         mode: document.getElementById('bt-mode').value,
@@ -630,7 +635,7 @@ async function runBacktest() {
         // 读取参数
         const skipCache = document.getElementById('bt-skip-cache').checked;
         const params = {
-            interval: currentInterval,
+            interval: window.currentInterval,
             start_date: document.getElementById('bt-start-date').value || '',
             end_date: document.getElementById('bt-end-date').value || '',
             mode: document.getElementById('bt-mode').value,

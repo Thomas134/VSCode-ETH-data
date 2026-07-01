@@ -58,6 +58,7 @@ def run_backtest():
 
         # 参数校验
         interval = params.get("interval", "1m")
+        logger.info(f"[回测请求] interval={interval}, params={params}")
         if interval not in VALID_INTERVALS:
             return jsonify({"error": f"不支持的时间级别: {interval}"}), 400
 
@@ -85,6 +86,9 @@ def run_backtest():
         cache_params = _get_cache_key_params(params, interval, 
                                             params.get("start_date", ""),
                                             params.get("end_date", ""))
+        import json
+        cache_key_debug = json.dumps(cache_params, sort_keys=True, separators=(',', ':'))
+        logger.info(f"[缓存调试] cache_params={cache_key_debug}")
         
         # 检查缓存（除非明确要求跳过缓存）
         skip_cache = params.get("_skip_cache", False)
@@ -94,28 +98,49 @@ def run_backtest():
                 logger.info("回测缓存命中，直接返回结果")
                 return JSONProfiler.profile(cached_result, "backtest_cached")
 
-        # 使用流式回测引擎 - 边读边算，不存储全部K线
-        from backtest.streaming_engine import StreamingBacktestEngine
+        # 优先使用向量化引擎（DuckDB），失败则回退到流式引擎（SQLite）
+        from backtest.vectorized_engine import VectorizedBacktestEngine
+        from config import DUCKDB_AVAILABLE
         
-        engine = StreamingBacktestEngine({
-            "mode": mode,
-            "stop_loss_pct": stop_loss,
-            "take_profit_pct": take_profit,
-            "initial_capital": capital,
-            "fee_rate": float(params.get("fee_rate", 0.05)),
-            "position_mode": pos_mode,
-            "percent_per_trade": float(params.get("percent_per_trade", 20)),
-            "fixed_amount": float(params.get("fixed_amount", 1000)),
-            "max_positions": int(params.get("max_positions", 3)),
-            "use_stop_profit": params.get("use_stop_profit", True),
-        })
-
-        # 流式执行 - 不加载全部K线到内存
-        result = engine.run_streaming(
-            interval,
-            params.get("start_date", ""),
-            params.get("end_date", "")
-        )
+        if DUCKDB_AVAILABLE:
+            logger.info("[回测] DuckDB 可用，使用向量化引擎")
+            engine = VectorizedBacktestEngine({
+                "mode": mode,
+                "stop_loss_pct": stop_loss,
+                "take_profit_pct": take_profit,
+                "initial_capital": capital,
+                "fee_rate": float(params.get("fee_rate", 0.05)),
+                "position_mode": pos_mode,
+                "percent_per_trade": float(params.get("percent_per_trade", 20)),
+                "fixed_amount": float(params.get("fixed_amount", 1000)),
+                "max_positions": int(params.get("max_positions", 3)),
+                "use_stop_profit": params.get("use_stop_profit", True),
+            })
+            result = engine.run(
+                interval,
+                params.get("start_date", ""),
+                params.get("end_date", "")
+            )
+        else:
+            logger.info("[回测] DuckDB 不可用，回退到流式引擎")
+            from backtest.streaming_engine import StreamingBacktestEngine
+            engine = StreamingBacktestEngine({
+                "mode": mode,
+                "stop_loss_pct": stop_loss,
+                "take_profit_pct": take_profit,
+                "initial_capital": capital,
+                "fee_rate": float(params.get("fee_rate", 0.05)),
+                "position_mode": pos_mode,
+                "percent_per_trade": float(params.get("percent_per_trade", 20)),
+                "fixed_amount": float(params.get("fixed_amount", 1000)),
+                "max_positions": int(params.get("max_positions", 3)),
+                "use_stop_profit": params.get("use_stop_profit", True),
+            })
+            result = engine.run_streaming(
+                interval,
+                params.get("start_date", ""),
+                params.get("end_date", "")
+            )
         log_memory("回测引擎完成")
 
         if "error" in result:
@@ -157,6 +182,63 @@ def clear_backtest_cache():
             backtest_cache.clear_all()
             return jsonify({"status": "ok", "message": "所有回测缓存已清除"})
     except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+@backtest_bp.route('/api/backtest/vectorized', methods=['POST'])
+def run_backtest_vectorized():
+    """
+    向量化回测入口 - DuckDB + numba 加速（实验性）
+    用法和 /api/backtest 相同，但使用向量化引擎
+    """
+    log_memory("向量化回测开始")
+    try:
+        params = request.get_json()
+        if not params:
+            return jsonify({"error": "请求体为空"}), 400
+
+        interval = params.get("interval", "1m")
+        if interval not in VALID_INTERVALS:
+            return jsonify({"error": f"不支持的时间级别: {interval}"}), 400
+
+        mode = params.get("mode", "both")
+        if mode not in VALID_MODES:
+            return jsonify({"error": f"不支持的交易模式: {mode}"}), 400
+
+        stop_loss = float(params.get("stop_loss_pct", 2.0))
+        take_profit = float(params.get("take_profit_pct", 5.0))
+        capital = float(params.get("initial_capital", 10000))
+
+        # 导入向量化引擎
+        from backtest.vectorized_engine import VectorizedBacktestEngine
+
+        engine = VectorizedBacktestEngine({
+            "mode": mode,
+            "stop_loss_pct": stop_loss,
+            "take_profit_pct": take_profit,
+            "initial_capital": capital,
+            "fee_rate": float(params.get("fee_rate", 0.05)),
+            "position_mode": params.get("position_mode", "percent"),
+            "percent_per_trade": float(params.get("percent_per_trade", 20)),
+            "fixed_amount": float(params.get("fixed_amount", 1000)),
+            "max_positions": int(params.get("max_positions", 3)),
+            "use_stop_profit": params.get("use_stop_profit", True),
+        })
+
+        result = engine.run(
+            interval,
+            params.get("start_date", ""),
+            params.get("end_date", "")
+        )
+
+        if "error" in result:
+            return jsonify(result), 400
+
+        log_memory("向量化回测完成")
+        return JSONProfiler.profile(result, "backtest_vectorized")
+
+    except Exception as e:
+        logger.error("向量化回测错误: %s", e)
         return jsonify({"error": str(e)}), 500
 
 

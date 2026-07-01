@@ -6,6 +6,21 @@ from pathlib import Path
 import sqlite3
 import threading
 
+# ── DuckDB 支持（阶段2：回测大数据查询专用） ──
+# 条件：1) duckdb 库已安装  2) 数据库文件实际存在
+try:
+    import duckdb
+    _duckdb_installed = True
+except ImportError:
+    _duckdb_installed = False
+
+# 检查数据库文件是否存在（在导入时检查，避免运行时重复判断）
+BASE_DIR = Path(__file__).resolve().parents[2]
+DUCKDB_KLINE_PATH = BASE_DIR / "duckdb_migration" / "duckdb_data" / "eth_perpetual.duckdb"
+DUCKDB_STRUCTURE_PATH = BASE_DIR / "duckdb_migration" / "duckdb_data" / "eth_structure.duckdb"
+
+DUCKDB_AVAILABLE = _duckdb_installed and DUCKDB_KLINE_PATH.exists() and DUCKDB_STRUCTURE_PATH.exists()
+
 # ── 数据库连接工厂（用完即关，避免内存泄漏） ──
 # 注意：虽然 connect() 有 50-100ms 开销，但回测算 3-5 秒，占比很小
 # 连接池会导致内存持续增长，所以采用"即用即关"模式
@@ -31,6 +46,31 @@ def get_structure_connection():
     conn.row_factory = sqlite3.Row
     return conn
 
+
+# ── DuckDB 连接工厂（回测专用，阶段2） ──
+def get_duckdb_kline_connection(read_only=True):
+    """
+    获取 DuckDB K线库连接（回测大数据查询专用）
+    用法：conn.execute(...).fetchdf() 返回 pandas DataFrame
+    """
+    if not DUCKDB_AVAILABLE:
+        raise ImportError("duckdb 未安装，请运行: pip install duckdb")
+    if not DUCKDB_KLINE_PATH.exists():
+        raise FileNotFoundError(f"DuckDB K线库不存在: {DUCKDB_KLINE_PATH}")
+    conn = duckdb.connect(str(DUCKDB_KLINE_PATH), read_only=read_only)
+    return conn
+
+def get_duckdb_structure_connection(read_only=True):
+    """
+    获取 DuckDB 结构库连接（回测分型数据查询专用）
+    """
+    if not DUCKDB_AVAILABLE:
+        raise ImportError("duckdb 未安装，请运行: pip install duckdb")
+    if not DUCKDB_STRUCTURE_PATH.exists():
+        raise FileNotFoundError(f"DuckDB 结构库不存在: {DUCKDB_STRUCTURE_PATH}")
+    conn = duckdb.connect(str(DUCKDB_STRUCTURE_PATH), read_only=read_only)
+    return conn
+
 # ── 项目根目录 ──
 # web/api/config.py → web → 项目根
 BASE_DIR = Path(__file__).resolve().parents[2]
@@ -38,6 +78,11 @@ BASE_DIR = Path(__file__).resolve().parents[2]
 # ── 数据库路径 ──
 DB_PATH = BASE_DIR / "bybit_eth_data" / "data" / "processed" / "eth_perpetual.db"
 STRUCTURE_DB = BASE_DIR / "bybit_eth_data" / "data" / "processed" / "eth_structure.db"
+
+# ── DuckDB 迁移后的路径（阶段1生成） ──
+# 注意：这些路径已在上面定义，用于判断 DUCKDB_AVAILABLE
+# DUCKDB_KLINE_PATH = BASE_DIR / "duckdb_migration" / "duckdb_data" / "eth_perpetual.duckdb"
+# DUCKDB_STRUCTURE_PATH = BASE_DIR / "duckdb_migration" / "duckdb_data" / "eth_structure.duckdb"
 
 # structure_api 中叠加显示也需要源数据库
 SOURCE_DB = DB_PATH  # 跟原始K线库是同一个
