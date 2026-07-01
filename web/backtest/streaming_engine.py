@@ -1,6 +1,7 @@
 """
 流式回测引擎 - 内存占用恒定，不存储全部K线
 """
+import logging
 import sys
 import sqlite3
 from typing import Dict, Any, Generator, Tuple
@@ -10,9 +11,10 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "api"))
 from config import DB_PATH, STRUCTURE_DB, KLINE_TABLE_MAP, FRACTAL_TABLE_MAP, INTERVAL_MS
 
+logger = logging.getLogger(__name__)
 
 def log(msg):
-    print(msg, file=sys.stderr, flush=True)
+    logger.info(msg)
 
 
 class StreamingBacktestEngine:

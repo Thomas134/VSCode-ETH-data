@@ -2,8 +2,11 @@
 # 为K线数据表创建索引，优化查询性能
 # 运行一次即可，索引会持久保存在数据库中
 
+import logging
 import sqlite3
 from pathlib import Path
+
+logger = logging.getLogger(__name__)
 
 # ── 数据库路径 ──
 BASE_DIR = Path(__file__).resolve().parents[1]  # 项目根目录
@@ -21,7 +24,7 @@ def create_indexes_for_db(conn, tables, time_column, is_structure=False):
     for table in tables:
         cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name=?", (table,))
         if not cursor.fetchone():
-            print(f"  [SKIP] 表 {table} 不存在，跳过")
+            logger.info("  [SKIP] 表 %s 不存在，跳过", table)
             continue
         try:
             if is_structure:
@@ -29,36 +32,35 @@ def create_indexes_for_db(conn, tables, time_column, is_structure=False):
                 cursor.execute(f"DROP INDEX IF EXISTS idx_{table}_start_label")
                 new_index = f"idx_{table}_start_label"
                 cursor.execute(f"CREATE INDEX IF NOT EXISTS {new_index} ON {table}(start_time DESC, fractal_label)")
-                print(f"  [OK] {table}: 新索引 {new_index} (start_time DESC, fractal_label)")
+                logger.info("  [OK] %s: 新索引 %s (start_time DESC, fractal_label)", table, new_index)
             else:
                 cursor.execute(f"DROP INDEX IF EXISTS idx_{table}_symbol_time")
                 cursor.execute(f"DROP INDEX IF EXISTS idx_{table}_symbol_interval")
                 new_index = f"idx_{table}_{time_column}"
                 cursor.execute(f"CREATE INDEX IF NOT EXISTS {new_index} ON {table}({time_column} DESC)")
-                print(f"  [OK] {table}: 新索引 {new_index} ({time_column} DESC)")
+                logger.info("  [OK] %s: 新索引 %s (%s DESC)", table, new_index, time_column)
         except Exception as e:
-            print(f"  [FAIL] {table} 处理失败: {e}")
+            logger.error("  [FAIL] %s 处理失败: %s", table, e)
     conn.commit()
 
 
 def main():
-    print("=== 重建SQLite索引（优化查询性能） ===\n")
+    logger.info("=== 重建SQLite索引（优化查询性能） ===\n")
     
     # ── 处理原始K线数据库 ──
-    print(f"【原始K线库】{DB_PATH}")
+    logger.info("【原始K线库】%s", DB_PATH)
     conn1 = sqlite3.connect(str(DB_PATH))
     create_indexes_for_db(conn1, KLINE_TABLES, "open_time", is_structure=False)
     conn1.close()
     
     # ── 处理结构数据库 ──
-    print(f"\n【结构K线库】{STRUCTURE_DB}")
+    logger.info("【结构K线库】%s", STRUCTURE_DB)
     conn2 = sqlite3.connect(str(STRUCTURE_DB))
     create_indexes_for_db(conn2, STD_TABLES, "start_time", is_structure=True)
     conn2.close()
     
-    print("\n[OK] 所有索引创建完成!")
+    logger.info("所有索引创建完成!")
 
 
 if __name__ == "__main__":
     main()
-

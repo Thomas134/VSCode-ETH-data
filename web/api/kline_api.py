@@ -11,6 +11,9 @@ from .config import (
 )
 from .cache_manager import kline_cache
 from .json_profiler import JSONProfiler  # JSON性能测试（可随时注释掉）
+from .logger import get_logger
+
+logger = get_logger(__name__)
 
 kline_bp = Blueprint('kline', __name__)
 
@@ -172,7 +175,7 @@ def get_kline():
                 
                 struct_conn.close()
             except sqlite3.Error as e:
-                print(f"[Fractal Query Error] {e}")
+                logger.error("分型查询错误: %s", e)
         
         conn.close()
         
@@ -399,13 +402,13 @@ def filter_fractal_regions(fractal_ranges, source_rows):
         v1 = result[violate_idx + 1]
         def ts_to_dt(ts_ms):
             return datetime.datetime.fromtimestamp(ts_ms / 1000).strftime('%Y-%m-%d %H:%M:%S')
-        print(f"[WARNING] 分型未交替出现! 第{violate_idx}和{violate_idx+1}个分型类型相同")
-        print(f"  分型[{violate_idx}]: {'顶' if v0['label']==1 else '底'}, "
-              f"high={v0['high']}, low={v0['low']}, time={ts_to_dt(v0['start'])}")
-        print(f"  分型[{violate_idx+1}]: {'顶' if v1['label']==1 else '底'}, "
-              f"high={v1['high']}, low={v1['low']}, time={ts_to_dt(v1['start'])}")
+        logger.warning("分型未交替出现! 第%s和%s个分型类型相同", violate_idx, violate_idx + 1)
+        logger.warning("  分型[%s]: %s, high=%s, low=%s, time=%s",
+                       violate_idx, '顶' if v0['label']==1 else '底', v0['high'], v0['low'], ts_to_dt(v0['start']))
+        logger.warning("  分型[%s]: %s, high=%s, low=%s, time=%s",
+                       violate_idx + 1, '顶' if v1['label']==1 else '底', v1['high'], v1['low'], ts_to_dt(v1['start']))
     else:
-        print(f"[OK] 分型严格交替出现, 共{len(result)}个分型")
+        logger.info("分型严格交替出现, 共%s个分型", len(result))
     
     return result
 

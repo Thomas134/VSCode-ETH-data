@@ -47,3 +47,125 @@
 2026-07-01 12:31:05,092 - web.app - INFO - WebSocket 客户端已断开: uglCAotiAHHe76XjAAAF
 2026-07-01 12:31:05,401 - web.app - INFO - WebSocket 客户端已断开: aCKfeTCeSocko4PxAAAB
 2026-07-01 12:31:07,228 - web.app - INFO - WebSocket 客户端 -_d9Rviv56qkIR3AAAAH 订阅 1h K线
+2026-07-01 16:07:02,626 - api.memory_monitor - INFO - [Memory 回测开始] 当前占用: 104.3 MB
+2026-07-01 16:07:04,619 - backtest.streaming_engine - INFO - [流式回测] 加载了 233347 个分型信号
+2026-07-01 16:07:04,621 - backtest.streaming_engine - INFO - ============================================================
+2026-07-01 16:07:04,623 - backtest.streaming_engine - INFO - [回测] 开始 - 资金=10000.0
+2026-07-01 16:07:04,624 - backtest.streaming_engine - INFO - [回测] 使用流式处理，内存占用恒定
+2026-07-01 16:07:04,625 - backtest.streaming_engine - INFO - ============================================================
+2026-07-01 16:07:04,895 - backtest.streaming_engine - INFO - [回测] 已处理 50000 根K线
+2026-07-01 16:07:05,120 - backtest.streaming_engine - INFO - [回测] 已处理 100000 根K线
+2026-07-01 16:07:05,419 - backtest.streaming_engine - INFO - [回测] 已处理 150000 根K线
+2026-07-01 16:07:05,663 - backtest.streaming_engine - INFO - [回测] 已处理 200000 根K线
+2026-07-01 16:07:06,002 - backtest.streaming_engine - INFO - [回测] 已处理 250000 根K线
+2026-07-01 16:07:06,229 - backtest.streaming_engine - INFO - [回测] 已处理 300000 根K线
+2026-07-01 16:07:06,466 - backtest.streaming_engine - INFO - [回测] 已处理 350000 根K线
+2026-07-01 16:07:06,700 - backtest.streaming_engine - INFO - [回测] 已处理 400000 根K线
+2026-07-01 16:07:06,929 - backtest.streaming_engine - INFO - [回测] 已处理 450000 根K线
+2026-07-01 16:07:07,164 - backtest.streaming_engine - INFO - [回测] 已处理 500000 根K线
+2026-07-01 16:07:07,403 - backtest.streaming_engine - INFO - [回测] 已处理 550000 根K线
+2026-07-01 16:07:07,653 - backtest.streaming_engine - INFO - [回测] 已处理 600000 根K线
+2026-07-01 16:07:07,904 - backtest.streaming_engine - INFO - [回测] 已处理 650000 根K线
+2026-07-01 16:07:08,147 - backtest.streaming_engine - INFO - [回测] 完成! 总交易: 233346, K线: 698957
+2026-07-01 16:07:08,180 - api.memory_monitor - INFO - [Memory 回测引擎完成] 当前占用: 242.0 MB
+2026-07-01 16:07:08,182 - api.backtest_api - INFO - 回测结果已缓存
+2026-07-01 16:07:08,217 - api.memory_monitor - INFO - 已执行垃圾回收
+2026-07-01 16:07:08,218 - api.memory_monitor - INFO - [Memory 清理后] 当前占用: 242.0 MB
+2026-07-01 16:07:26,780 - api.memory_monitor - INFO - [Memory 回测开始] 当前占用: 242.7 MB
+2026-07-01 16:07:28,418 - backtest.streaming_engine - INFO - [流式回测] 加载了 233347 个分型信号
+2026-07-01 16:07:28,420 - backtest.streaming_engine - INFO - ============================================================
+2026-07-01 16:07:28,421 - backtest.streaming_engine - INFO - [回测] 开始 - 资金=10000.0
+2026-07-01 16:07:28,422 - backtest.streaming_engine - INFO - [回测] 使用流式处理，内存占用恒定
+2026-07-01 16:07:28,423 - backtest.streaming_engine - INFO - ============================================================
+2026-07-01 16:07:28,662 - backtest.streaming_engine - INFO - [回测] 已处理 50000 根K线
+2026-07-01 16:07:28,997 - backtest.streaming_engine - INFO - [回测] 已处理 100000 根K线
+2026-07-01 16:07:29,379 - backtest.streaming_engine - INFO - [回测] 已处理 150000 根K线
+2026-07-01 16:07:29,720 - backtest.streaming_engine - INFO - [回测] 已处理 200000 根K线
+2026-07-01 16:07:30,055 - backtest.streaming_engine - INFO - [回测] 已处理 250000 根K线
+2026-07-01 16:07:30,366 - backtest.streaming_engine - INFO - [回测] 已处理 300000 根K线
+2026-07-01 16:07:30,665 - backtest.streaming_engine - INFO - [回测] 已处理 350000 根K线
+2026-07-01 16:07:30,994 - backtest.streaming_engine - INFO - [回测] 已处理 400000 根K线
+2026-07-01 16:07:31,303 - backtest.streaming_engine - INFO - [回测] 已处理 450000 根K线
+2026-07-01 16:07:31,592 - backtest.streaming_engine - INFO - [回测] 已处理 500000 根K线
+2026-07-01 16:07:31,883 - backtest.streaming_engine - INFO - [回测] 已处理 550000 根K线
+2026-07-01 16:07:32,119 - backtest.streaming_engine - INFO - [回测] 已处理 600000 根K线
+2026-07-01 16:07:32,371 - backtest.streaming_engine - INFO - [回测] 已处理 650000 根K线
+2026-07-01 16:07:32,603 - backtest.streaming_engine - INFO - [回测] 完成! 总交易: 233346, K线: 698957
+2026-07-01 16:07:32,626 - api.memory_monitor - INFO - [Memory 回测引擎完成] 当前占用: 375.6 MB
+2026-07-01 16:07:32,627 - api.backtest_api - INFO - 回测结果已缓存
+2026-07-01 16:07:32,668 - api.memory_monitor - INFO - 已执行垃圾回收
+2026-07-01 16:07:32,670 - api.memory_monitor - INFO - [Memory 清理后] 当前占用: 375.6 MB
+2026-07-01 16:07:38,205 - api.memory_monitor - INFO - [Memory 回测开始] 当前占用: 376.7 MB
+2026-07-01 16:07:38,206 - api.backtest_api - INFO - 回测缓存命中，直接返回结果
+2026-07-01 16:07:59,901 - api.memory_monitor - INFO - [Memory 回测开始] 当前占用: 376.7 MB
+2026-07-01 16:08:01,824 - backtest.streaming_engine - INFO - [流式回测] 加载了 233347 个分型信号
+2026-07-01 16:08:01,826 - backtest.streaming_engine - INFO - ============================================================
+2026-07-01 16:08:01,827 - backtest.streaming_engine - INFO - [回测] 开始 - 资金=10000.0
+2026-07-01 16:08:01,828 - backtest.streaming_engine - INFO - [回测] 使用流式处理，内存占用恒定
+2026-07-01 16:08:01,829 - backtest.streaming_engine - INFO - ============================================================
+2026-07-01 16:08:02,065 - backtest.streaming_engine - INFO - [回测] 已处理 50000 根K线
+2026-07-01 16:08:02,318 - backtest.streaming_engine - INFO - [回测] 已处理 100000 根K线
+2026-07-01 16:08:02,557 - backtest.streaming_engine - INFO - [回测] 已处理 150000 根K线
+2026-07-01 16:08:02,791 - backtest.streaming_engine - INFO - [回测] 已处理 200000 根K线
+2026-07-01 16:08:03,035 - backtest.streaming_engine - INFO - [回测] 已处理 250000 根K线
+2026-07-01 16:08:03,297 - backtest.streaming_engine - INFO - [回测] 已处理 300000 根K线
+2026-07-01 16:08:03,573 - backtest.streaming_engine - INFO - [回测] 已处理 350000 根K线
+2026-07-01 16:08:03,812 - backtest.streaming_engine - INFO - [回测] 已处理 400000 根K线
+2026-07-01 16:08:04,049 - backtest.streaming_engine - INFO - [回测] 已处理 450000 根K线
+2026-07-01 16:08:04,304 - backtest.streaming_engine - INFO - [回测] 已处理 500000 根K线
+2026-07-01 16:08:04,550 - backtest.streaming_engine - INFO - [回测] 已处理 550000 根K线
+2026-07-01 16:08:04,786 - backtest.streaming_engine - INFO - [回测] 已处理 600000 根K线
+2026-07-01 16:08:05,023 - backtest.streaming_engine - INFO - [回测] 已处理 650000 根K线
+2026-07-01 16:08:05,271 - backtest.streaming_engine - INFO - [回测] 完成! 总交易: 233346, K线: 698957
+2026-07-01 16:08:05,294 - api.memory_monitor - INFO - [Memory 回测引擎完成] 当前占用: 512.2 MB
+2026-07-01 16:08:05,296 - api.backtest_api - INFO - 回测结果已缓存
+2026-07-01 16:08:05,336 - api.memory_monitor - INFO - 已执行垃圾回收
+2026-07-01 16:08:05,337 - api.memory_monitor - INFO - [Memory 清理后] 当前占用: 512.2 MB
+2026-07-01 16:08:16,897 - api.memory_monitor - INFO - [Memory 回测开始] 当前占用: 512.6 MB
+2026-07-01 16:08:18,743 - backtest.streaming_engine - INFO - [流式回测] 加载了 233347 个分型信号
+2026-07-01 16:08:18,745 - backtest.streaming_engine - INFO - ============================================================
+2026-07-01 16:08:18,746 - backtest.streaming_engine - INFO - [回测] 开始 - 资金=10000.0
+2026-07-01 16:08:18,747 - backtest.streaming_engine - INFO - [回测] 使用流式处理，内存占用恒定
+2026-07-01 16:08:18,747 - backtest.streaming_engine - INFO - ============================================================
+2026-07-01 16:08:18,983 - backtest.streaming_engine - INFO - [回测] 已处理 50000 根K线
+2026-07-01 16:08:19,207 - backtest.streaming_engine - INFO - [回测] 已处理 100000 根K线
+2026-07-01 16:08:19,448 - backtest.streaming_engine - INFO - [回测] 已处理 150000 根K线
+2026-07-01 16:08:19,668 - backtest.streaming_engine - INFO - [回测] 已处理 200000 根K线
+2026-07-01 16:08:19,882 - backtest.streaming_engine - INFO - [回测] 已处理 250000 根K线
+2026-07-01 16:08:20,096 - backtest.streaming_engine - INFO - [回测] 已处理 300000 根K线
+2026-07-01 16:08:20,318 - backtest.streaming_engine - INFO - [回测] 已处理 350000 根K线
+2026-07-01 16:08:20,542 - backtest.streaming_engine - INFO - [回测] 已处理 400000 根K线
+2026-07-01 16:08:20,770 - backtest.streaming_engine - INFO - [回测] 已处理 450000 根K线
+2026-07-01 16:08:21,002 - backtest.streaming_engine - INFO - [回测] 已处理 500000 根K线
+2026-07-01 16:08:21,247 - backtest.streaming_engine - INFO - [回测] 已处理 550000 根K线
+2026-07-01 16:08:21,471 - backtest.streaming_engine - INFO - [回测] 已处理 600000 根K线
+2026-07-01 16:08:21,714 - backtest.streaming_engine - INFO - [回测] 已处理 650000 根K线
+2026-07-01 16:08:21,942 - backtest.streaming_engine - INFO - [回测] 完成! 总交易: 233346, K线: 698957
+2026-07-01 16:08:21,975 - api.memory_monitor - INFO - [Memory 回测引擎完成] 当前占用: 647.2 MB
+2026-07-01 16:08:21,976 - api.backtest_api - INFO - 回测结果已缓存
+2026-07-01 16:08:22,013 - api.memory_monitor - INFO - 已执行垃圾回收
+2026-07-01 16:08:22,014 - api.memory_monitor - INFO - [Memory 清理后] 当前占用: 647.2 MB
+2026-07-01 16:08:30,292 - api.memory_monitor - INFO - [Memory 回测开始] 当前占用: 648.3 MB
+2026-07-01 16:08:31,833 - backtest.streaming_engine - INFO - [流式回测] 加载了 233347 个分型信号
+2026-07-01 16:08:31,834 - backtest.streaming_engine - INFO - ============================================================
+2026-07-01 16:08:31,837 - backtest.streaming_engine - INFO - [回测] 开始 - 资金=10000.0
+2026-07-01 16:08:31,838 - backtest.streaming_engine - INFO - [回测] 使用流式处理，内存占用恒定
+2026-07-01 16:08:31,838 - backtest.streaming_engine - INFO - ============================================================
+2026-07-01 16:08:32,171 - backtest.streaming_engine - INFO - [回测] 已处理 50000 根K线
+2026-07-01 16:08:32,486 - backtest.streaming_engine - INFO - [回测] 已处理 100000 根K线
+2026-07-01 16:08:32,748 - backtest.streaming_engine - INFO - [回测] 已处理 150000 根K线
+2026-07-01 16:08:33,030 - backtest.streaming_engine - INFO - [回测] 已处理 200000 根K线
+2026-07-01 16:08:33,341 - backtest.streaming_engine - INFO - [回测] 已处理 250000 根K线
+2026-07-01 16:08:33,584 - backtest.streaming_engine - INFO - [回测] 已处理 300000 根K线
+2026-07-01 16:08:33,812 - backtest.streaming_engine - INFO - [回测] 已处理 350000 根K线
+2026-07-01 16:08:34,037 - backtest.streaming_engine - INFO - [回测] 已处理 400000 根K线
+2026-07-01 16:08:34,298 - backtest.streaming_engine - INFO - [回测] 已处理 450000 根K线
+2026-07-01 16:08:34,527 - backtest.streaming_engine - INFO - [回测] 已处理 500000 根K线
+2026-07-01 16:08:34,755 - backtest.streaming_engine - INFO - [回测] 已处理 550000 根K线
+2026-07-01 16:08:34,985 - backtest.streaming_engine - INFO - [回测] 已处理 600000 根K线
+2026-07-01 16:08:35,228 - backtest.streaming_engine - INFO - [回测] 已处理 650000 根K线
+2026-07-01 16:08:35,445 - backtest.streaming_engine - INFO - [回测] 完成! 总交易: 233346, K线: 698957
+2026-07-01 16:08:35,474 - api.memory_monitor - INFO - [Memory 回测引擎完成] 当前占用: 781.5 MB
+2026-07-01 16:08:35,475 - api.backtest_api - INFO - 回测结果已缓存
+2026-07-01 16:08:35,515 - api.memory_monitor - INFO - 已执行垃圾回收
+2026-07-01 16:08:35,517 - api.memory_monitor - INFO - [Memory 清理后] 当前占用: 781.5 MB

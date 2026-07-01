@@ -11,6 +11,9 @@ from .config import (
 from .cache_manager import backtest_cache
 from .memory_monitor import log_memory, force_gc
 from .json_profiler import JSONProfiler  # JSON性能测试
+from .logger import get_logger
+
+logger = get_logger(__name__)
 
 backtest_bp = Blueprint('backtest', __name__)
 
@@ -75,7 +78,7 @@ def _load_kline_with_signals(interval, start_date, end_date):
         kline_rows.extend(batch)
         batch_num += 1
         if batch_num % 10 == 0:
-            print(f"[K线加载] 已加载 {len(kline_rows):,} 条...")
+            logger.info("K线加载中，已加载 %s 条...", len(kline_rows))
     
     conn.close()  # 关闭连接释放内存
 
@@ -207,7 +210,7 @@ def run_backtest():
         if not skip_cache:
             cached_result = backtest_cache.get(cache_params)
             if cached_result:
-                print(f"[Backtest] 缓存命中，直接返回结果")
+                logger.info("回测缓存命中，直接返回结果")
                 return JSONProfiler.profile(cached_result, "backtest_cached")
 
         # 使用流式回测引擎 - 边读边算，不存储全部K线
@@ -240,7 +243,7 @@ def run_backtest():
         # 保存结果到缓存
         if not skip_cache:
             backtest_cache.set(cache_params, result)
-            print(f"[Backtest] 结果已缓存")
+            logger.info("回测结果已缓存")
         
         # 删除引用
         del engine
@@ -250,7 +253,7 @@ def run_backtest():
         return JSONProfiler.profile(result, "backtest")
 
     except Exception as e:
-        print(f"[Backtest] 错误: {e}")
+        logger.error("回测错误: %s", e)
         return jsonify({"error": str(e)}), 500
 
 

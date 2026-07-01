@@ -11,9 +11,12 @@ JSON 序列化性能分析器 - 支持 orjson/标准库 切换
     USE_ORJSON = False → 使用 Flask 默认 jsonify (标准库)
 """
 
+import logging
 import time
 import json as json_stdlib
 from flask import Response
+
+logger = logging.getLogger(__name__)
 
 # ═══════════════════════════════════════════════════════
 # JSON 引擎开关（只改这里！）
@@ -54,7 +57,7 @@ class JSONProfiler:
         # 显示使用的引擎
         engine = "orjson" if (USE_ORJSON and ORJSON_AVAILABLE) else "json"
         prefix = f"[{endpoint_name}]" if endpoint_name else "[JSON]"
-        print(f"{prefix:12s} {elapsed_ms:>7.2f}ms | {data_info} | engine={engine}")
+        logger.info("%s %7.2fms | %s | engine=%s", prefix, elapsed_ms, data_info, engine)
 
         return response
     
@@ -100,8 +103,7 @@ class JSONProfiler:
 
 
 # 启动时打印当前配置
-print(f"[JSONProfiler] USE_ORJSON={USE_ORJSON}, enabled={JSONProfiler.enabled}")
+logger.info("JSONProfiler USE_ORJSON=%s, enabled=%s", USE_ORJSON, JSONProfiler.enabled)
 if USE_ORJSON and not ORJSON_AVAILABLE:
-    print("[JSONProfiler] ⚠️  USE_ORJSON=True 但 orjson 未安装，将回退到标准库")
-    print("[JSONProfiler]    安装命令: pip install orjson")
-
+    logger.warning("USE_ORJSON=True 但 orjson 未安装，将回退到标准库")
+    logger.info("安装命令: pip install orjson")

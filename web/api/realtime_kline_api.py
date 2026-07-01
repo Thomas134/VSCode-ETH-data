@@ -12,6 +12,9 @@ from flask import Blueprint, jsonify, request
 from bybit_client import BybitClient
 from structure_analyzer import process_containing_relationship, identify_fractals
 from .config import DB_PATH, STRUCTURE_DB, KLINE_TABLE_MAP, FRACTAL_TABLE_MAP, INTERVAL_MS, get_db_connection, get_structure_connection
+from .logger import get_logger
+
+logger = get_logger(__name__)
 
 realtime_bp = Blueprint('realtime_kline', __name__)
 bybit_client = BybitClient()
@@ -61,7 +64,7 @@ def get_local_klines_with_fractal(interval, limit=500):
             fractal_map[row['start_time']] = row['fractal_label']
         conn.close()
     except Exception as e:
-        print(f"[DB Error] 获取分型失败: {e}")
+        logger.error("获取分型失败: %s", e)
     
     # 组装数据（structure_analyzer需要的格式）
     klines = []
@@ -107,7 +110,7 @@ def get_bybit_latest(interval, limit=5):
             })
         return result
     except Exception as e:
-        print(f"[Bybit Error] {e}")
+        logger.error("Bybit获取最新K线失败: %s", e)
         return []
 
 
@@ -134,7 +137,7 @@ def fill_gap_klines(interval, start_time, end_time):
                 limit=200
             )
         else:
-            print(f"[Fill Gap] 断层 {gap_size} 条，使用分页获取")
+            logger.info("断层 %s 条，使用分页获取", gap_size)
             klines = bybit_client.get_klines_batch(
                 "ETHUSDT",
                 BYBIT_INTERVAL[interval],
@@ -142,7 +145,7 @@ def fill_gap_klines(interval, start_time, end_time):
             )
         
         if not klines:
-            print(f"[Fill Gap] 无数据返回")
+            logger.warning("填补断层无数据返回")
             return []
         
         # 过滤在目标区间内的数据
@@ -161,13 +164,11 @@ def fill_gap_klines(interval, start_time, end_time):
                     'fractal_label': 0
                 })
         
-        print(f"[Fill Gap] 区间 {start_time} ~ {end_time}, 获取 {len(all_klines)} 条数据")
+        logger.info("填补断层区间 %s ~ %s, 获取 %s 条数据", start_time, end_time, len(all_klines))
         return all_klines
         
     except Exception as e:
-        print(f"[Fill Gap Error] {e}")
-        import traceback
-        traceback.print_exc()
+        logger.error("填补断层失败: %s", e, exc_info=True)
         return []
 
 
@@ -218,7 +219,7 @@ def get_realtime_kline():
             
             if live_first_start > local_last_end + gap_threshold:
                 gap_size = (live_first_start - local_last_end) // interval_ms - 1
-                print(f"[Gap Detected] 本地结束: {local_last_end}, 实时开始: {live_first_start}, 断层: {gap_size} 根K线")
+                logger.info("检测到断层: 本地结束=%s, 实时开始=%s, 断层=%s 根K线", local_last_end, live_first_start, gap_size)
                 
                 # 限制最大填补数量（利用分页获取，最大支持1000条）
                 MAX_GAP_FILL = 5000  # 最多填补1000条
@@ -228,7 +229,7 @@ def get_realtime_kline():
                 gap_start = local_last_end
                 
                 if gap_size > MAX_GAP_FILL:
-                    print(f"[Gap Warning] 断层太大({gap_size}条)，只填补最近{MAX_GAP_FILL}条")
+                    logger.warning("断层太大(%s条)，只填补最近%s条", gap_size, MAX_GAP_FILL)
                     # 只填补最近的MAX_GAP_FILL条
                     gap_start = live_first_start - interval_ms * (MAX_GAP_FILL + 1)
                 
@@ -239,11 +240,11 @@ def get_realtime_kline():
                 
                 if gap_klines:
                     gap_filled_count = len(gap_klines)
-                    print(f"[Gap Filled] 成功填补 {gap_filled_count} 条数据")
+                    logger.info("成功填补 %s 条断层数据", gap_filled_count)
                     # 将填补的数据插入到实时数据之前
                     live_klines = gap_klines + live_klines
                 else:
-                    print("[Gap Warning] 无法获取断层数据")
+                    logger.warning("无法获取断层数据")
         
         # 4. 合并数据（新数据覆盖旧数据）
         time_map = {k['start_time']: k for k in local_klines}
@@ -298,9 +299,7 @@ def get_realtime_kline():
         })
         
     except Exception as e:
-        print(f"[Realtime API Error] {e}")
-        import traceback
-        traceback.print_exc()
+        logger.error("Realtime API 错误: %s", e, exc_info=True)
         
         # 出错时返回本地数据保底
         try:
@@ -313,7 +312,7 @@ def get_realtime_kline():
                 "error": str(e)
             })
         except Exception as e2:
-            print(f"[Realtime Fallback Error] {e2}")
+            logger.error("Realtime Fallback 错误: %s", e2)
             return jsonify({"error": str(e2)}), 500
 
 

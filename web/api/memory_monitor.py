@@ -1,10 +1,12 @@
 """
 内存监控工具 - 用于诊断内存泄漏
 """
+import logging
 import os
 import psutil
 import gc
 
+logger = logging.getLogger(__name__)
 process = psutil.Process(os.getpid())
 
 def get_memory_mb():
@@ -14,13 +16,13 @@ def get_memory_mb():
 def log_memory(tag=""):
     """打印当前内存状态"""
     mem = get_memory_mb()
-    print(f"[Memory {tag}] 当前占用: {mem:.1f} MB")
+    logger.info("[Memory %s] 当前占用: %.1f MB", tag, mem)
     return mem
 
 def force_gc():
     """强制垃圾回收"""
     gc.collect()
-    print(f"[GC] 已执行垃圾回收")
+    logger.info("已执行垃圾回收")
 
 def get_object_count():
     """获取当前对象数量统计"""
@@ -32,8 +34,8 @@ def get_object_count():
     
     # 排序显示最多的类型
     sorted_counts = sorted(counts.items(), key=lambda x: x[1], reverse=True)
-    print("[Object Count] Top 10:")
+    logger.info("Object Count Top 10:")
     for typename, count in sorted_counts[:10]:
-        print(f"  {typename}: {count}")
+        logger.info("  %s: %s", typename, count)
     
     return sorted_counts

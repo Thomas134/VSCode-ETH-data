@@ -1,4 +1,5 @@
 # bybit_client.py - 使用 requests 库
+import logging
 import requests
 import pandas as pd
 import time
@@ -7,13 +8,15 @@ import hashlib
 from urllib.parse import urlencode
 from bybit_config import BYBIT_API_KEY, BYBIT_API_SECRET
 
+logger = logging.getLogger(__name__)
+
 class BybitClient:
     def __init__(self):
         self.base_url = "https://api.bybit.com"
         self.api_key = BYBIT_API_KEY
         self.api_secret = BYBIT_API_SECRET
         self.session = requests.Session()
-        print("✓ Bybit客户端初始化成功 (使用requests)")
+        logger.info("Bybit客户端初始化成功 (使用requests)")
 
     def _generate_signature(self, params, timestamp, recv_window="5000"):
         """生成API签名"""
@@ -51,11 +54,11 @@ class BybitClient:
                 # API返回的数据是从最新到最旧，我们需要反转它
                 return list(reversed(kline_list))
             else:
-                print(f"API错误: {data.get('retMsg', 'Unknown error')}")
+                logger.error("API错误: %s", data.get('retMsg', 'Unknown error'))
                 return None
                 
         except Exception as e:
-            print(f"获取K线数据失败: {e}")
+            logger.error("获取K线数据失败: %s", e)
             return None
 
     def get_klines_batch(self, symbol, interval, total_limit=1000):
@@ -111,13 +114,13 @@ class BybitClient:
             data = response.json()
             
             if data.get('retCode') == 0:
-                print("✓ Bybit API连接测试成功")
+                logger.info("Bybit API连接测试成功")
                 return True
             else:
-                print(f"✗ Bybit API连接测试失败: {data.get('retMsg', 'Unknown error')}")
+                logger.error("Bybit API连接测试失败: %s", data.get('retMsg', 'Unknown error'))
                 return False
         except Exception as e:
-            print(f"✗ 连接测试异常: {e}")
+            logger.error("连接测试异常: %s", e)
             return False
 
 def get_bybit_client():
@@ -127,13 +130,13 @@ if __name__ == "__main__":
     client = get_bybit_client()
     if client.test_connection():
         # 测试获取少量数据
-        print("测试获取K线数据...")
+        logger.info("测试获取K线数据...")
         klines = client.get_klines("ETHUSDT", "1", limit=5)
         if klines:
-            print(f"✓ 成功获取 {len(klines)} 条K线数据")
+            logger.info("成功获取 %s 条K线数据", len(klines))
             for kline in klines:
-                print(f"  时间: {kline[0]}, 开: {kline[1]}, 高: {kline[2]}, 低: {kline[3]}, 收: {kline[4]}, 量: {kline[5]}")
+                logger.info("  时间: %s, 开: %s, 高: %s, 低: %s, 收: %s, 量: %s", kline[0], kline[1], kline[2], kline[3], kline[4], kline[5])
         else:
-            print("✗ 获取K线数据失败")
+            logger.error("获取K线数据失败")
     else:
-        print("✗ API连接测试失败")
+        logger.error("API连接测试失败")
