@@ -6,3 +6,44 @@
 2026-07-01 12:02:01,168 - web.app - INFO - WebSocket 客户端已断开
 2026-07-01 12:02:02,010 - web.app - INFO - WebSocket 客户端订阅 1m K线
 2026-07-01 12:02:20,350 - web.app - INFO - WebSocket 客户端已断开
+2026-07-01 12:16:30,671 - web.app - INFO - WebSocket 启动K线推送线程
+2026-07-01 12:16:31,062 - web.app - INFO - WebSocket 客户端订阅 1m K线
+2026-07-01 12:16:40,558 - web.app - INFO - WebSocket 客户端已断开
+2026-07-01 12:16:44,266 - web.app - INFO - WebSocket 客户端订阅 1m K线
+2026-07-01 12:17:49,025 - web.app - INFO - WebSocket 启动K线推送线程
+2026-07-01 12:17:49,074 - web.app - INFO - WebSocket 客户端订阅 1m K线
+2026-07-01 12:17:52,890 - web.app - INFO - WebSocket 客户端订阅 1m K线
+2026-07-01 12:18:00,349 - web.app - INFO - WebSocket 客户端已断开
+2026-07-01 12:18:01,856 - web.app - INFO - WebSocket 客户端订阅 5m K线
+2026-07-01 12:18:39,787 - web.app - INFO - WebSocket 客户端已断开
+2026-07-01 12:18:42,702 - web.app - INFO - WebSocket 客户端已断开
+2026-07-01 12:18:45,745 - web.app - INFO - WebSocket 客户端已断开
+2026-07-01 12:18:57,921 - web.app - INFO - WebSocket 客户端订阅 1m K线
+2026-07-01 12:19:04,819 - web.app - INFO - WebSocket 客户端已断开
+2026-07-01 12:19:06,943 - web.app - INFO - WebSocket 客户端订阅 1m K线
+2026-07-01 12:19:40,449 - web.app - INFO - WebSocket 客户端已断开
+2026-07-01 12:19:55,072 - web.app - INFO - WebSocket 客户端订阅 1m K线
+2026-07-01 12:20:30,811 - web.app - INFO - WebSocket 启动K线推送线程
+2026-07-01 12:20:30,815 - web.app - INFO - WebSocket 客户端订阅 1m K线
+2026-07-01 12:20:31,060 - web.app - INFO - WebSocket 客户端已断开
+2026-07-01 12:20:44,313 - web.app - INFO - WebSocket 客户端订阅 1m K线
+2026-07-01 12:23:30,314 - web.app - INFO - WebSocket 启动K线推送线程
+2026-07-01 12:23:30,673 - web.app - INFO - WebSocket 客户端订阅 1m K线
+2026-07-01 12:23:33,502 - web.app - INFO - WebSocket 客户端已断开
+2026-07-01 12:23:40,946 - web.app - INFO - WebSocket 客户端订阅 1m K线
+2026-07-01 12:24:08,991 - web.app - INFO - WebSocket 客户端已断开
+2026-07-01 12:24:16,744 - web.app - INFO - WebSocket 客户端订阅 5m K线
+2026-07-01 12:28:36,098 - web.app - INFO - WebSocket 启动K线推送线程
+2026-07-01 12:28:45,818 - web.app - INFO - WebSocket 客户端已断开: VCz_tX1Lytd2Fh9hAAAB
+2026-07-01 12:29:08,964 - web.app - INFO - WebSocket 客户端已断开: g_X7Eplkj_ZGkj4EAAAD
+2026-07-01 12:29:35,985 - web.app - INFO - WebSocket 客户端已断开: _AT8jvdWYViJqGquAAAF
+2026-07-01 12:30:19,314 - web.app - INFO - WebSocket 启动K线推送线程
+2026-07-01 12:30:19,365 - web.app - INFO - WebSocket 客户端 aCKfeTCeSocko4PxAAAB 订阅 1d K线
+2026-07-01 12:30:25,265 - web.app - INFO - WebSocket 客户端 h46w2RmJaKzHG8i6AAAD 订阅 1m K线
+2026-07-01 12:30:28,883 - web.app - INFO - WebSocket 客户端 h46w2RmJaKzHG8i6AAAD 取消订阅 1m K线
+2026-07-01 12:30:28,884 - web.app - INFO - WebSocket 客户端已断开: h46w2RmJaKzHG8i6AAAD
+2026-07-01 12:30:31,957 - web.app - INFO - WebSocket 客户端 uglCAotiAHHe76XjAAAF 订阅 5m K线
+2026-07-01 12:31:05,091 - web.app - INFO - WebSocket 客户端 uglCAotiAHHe76XjAAAF 取消订阅 5m K线
+2026-07-01 12:31:05,092 - web.app - INFO - WebSocket 客户端已断开: uglCAotiAHHe76XjAAAF
+2026-07-01 12:31:05,401 - web.app - INFO - WebSocket 客户端已断开: aCKfeTCeSocko4PxAAAB
+2026-07-01 12:31:07,228 - web.app - INFO - WebSocket 客户端 -_d9Rviv56qkIR3AAAAH 订阅 1h K线

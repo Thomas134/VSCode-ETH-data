@@ -25,7 +25,7 @@ class BybitClient:
         ).hexdigest()
         return signature
 
-    def get_klines(self, symbol, interval, start_time=None, limit=200):
+    def get_klines(self, symbol, interval, start_time=None, end_time=None, limit=200):
         """
         获取K线数据 - 使用公共接口，不需要认证
         """
@@ -40,6 +40,8 @@ class BybitClient:
             
             if start_time:
                 params["start"] = str(start_time)
+            if end_time:
+                params["end"] = str(end_time)
             
             response = self.session.get(url, params=params, timeout=10)
             data = response.json()
@@ -55,6 +57,51 @@ class BybitClient:
         except Exception as e:
             print(f"获取K线数据失败: {e}")
             return None
+
+    def get_klines_batch(self, symbol, interval, total_limit=1000):
+        """
+        分页获取K线（带频率保护）
+        Bybit限制: 50次/秒/IP
+        保守策略: 每秒最多5次请求
+        """
+        all_klines = []
+        end_time = None
+        request_count = 0
+        MAX_RPS = 45  # 每秒45次，接近Bybit 50次限制
+        
+        while len(all_klines) < total_limit:
+            # 频率保护: 每45次请求暂停1秒
+            if request_count >= MAX_RPS:
+                time.sleep(1)
+                request_count = 0
+            
+            # 计算本次需要获取的数量
+            remaining = total_limit - len(all_klines)
+            batch_limit = min(200, remaining)
+            
+            batch = self.get_klines(
+                symbol=symbol,
+                interval=interval,
+                end_time=end_time,
+                limit=batch_limit
+            )
+            
+            request_count += 1
+            
+            if not batch:
+                break
+            
+            all_klines.extend(batch)
+            
+            # 下一批从最早时间之前开始
+            earliest_time = int(batch[0][0])
+            end_time = earliest_time - 1
+            
+            # 如果返回少于200条，说明数据到头了
+            if len(batch) < 200:
+                break
+        
+        return all_klines
 
     def test_connection(self):
         """测试API连接"""

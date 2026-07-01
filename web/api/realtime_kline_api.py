@@ -114,7 +114,7 @@ def get_bybit_latest(interval, limit=5):
 def fill_gap_klines(interval, start_time, end_time):
     """
     从Bybit获取指定时间区间的K线数据，填补断层
-    简化逻辑：直接获取区间内的所有数据
+    支持分页获取（超过200条自动分批）
     """
     if interval not in BYBIT_INTERVAL:
         return []
@@ -122,13 +122,24 @@ def fill_gap_klines(interval, start_time, end_time):
     try:
         interval_ms = INTERVAL_MS[interval]
         
-        # 直接获取整个区间的数据（Bybit最多返回200条，应该够用了）
-        klines = bybit_client.get_klines(
-            "ETHUSDT", 
-            BYBIT_INTERVAL[interval], 
-            start_time=start_time,
-            limit=200
-        )
+        # 计算需要多少条
+        gap_size = (end_time - start_time) // interval_ms
+        
+        # 小断层直接获取，大断层用分页
+        if gap_size <= 200:
+            klines = bybit_client.get_klines(
+                "ETHUSDT", 
+                BYBIT_INTERVAL[interval], 
+                start_time=start_time,
+                limit=200
+            )
+        else:
+            print(f"[Fill Gap] 断层 {gap_size} 条，使用分页获取")
+            klines = bybit_client.get_klines_batch(
+                "ETHUSDT",
+                BYBIT_INTERVAL[interval],
+                total_limit=min(gap_size, 5000)  # 最多补5000条
+            )
         
         if not klines:
             print(f"[Fill Gap] 无数据返回")
@@ -209,8 +220,8 @@ def get_realtime_kline():
                 gap_size = (live_first_start - local_last_end) // interval_ms - 1
                 print(f"[Gap Detected] 本地结束: {local_last_end}, 实时开始: {live_first_start}, 断层: {gap_size} 根K线")
                 
-                # 限制最大填补数量（避免一次性获取太多数据）
-                MAX_GAP_FILL = 200  # 最多填补200条
+                # 限制最大填补数量（利用分页获取，最大支持1000条）
+                MAX_GAP_FILL = 5000  # 最多填补1000条
                 
                 # 计算需要填补的区间
                 # 从本地最后一条的下一条开始，到实时第一条的前一条结束（或最多MAX_GAP_FILL条）

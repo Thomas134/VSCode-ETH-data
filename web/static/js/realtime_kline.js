@@ -95,7 +95,12 @@ async function loadRealtimeKlineData(interval, limit = 500) {
 }
 
 function startRealtimePolling(interval) {
-    stopRealtimePolling();
+    // 如果切换了时间级别，先取消旧订阅
+    if (socket && currentInterval !== interval) {
+        socket.emit('unsubscribe_kline', { interval: currentInterval });
+        console.log('[WebSocket] 取消订阅', currentInterval);
+    }
+    
     currentInterval = interval;
     
     // 使用 WebSocket 替代轮询
@@ -125,6 +130,8 @@ function startRealtimePolling(interval) {
 
 function stopRealtimePolling() {
     if (socket) {
+        // 取消当前订阅再断开
+        socket.emit('unsubscribe_kline', { interval: currentInterval });
         socket.disconnect();
         socket = null;
         console.log('[WebSocket] 已停止');

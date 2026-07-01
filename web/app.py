@@ -54,20 +54,30 @@ def clear_cache():
     kline_cache.clear_all()
     return jsonify({"status": "ok", "message": "缓存已清除"})
 
+# ── 订阅管理 ──
+# 记录每个客户端订阅的时间级别: {sid: set(intervals)}
+client_subscriptions = {}
+
 # ── WebSocket 事件处理 ──
 @socketio.on('connect')
 def handle_connect():
-    logger.info("WebSocket 客户端已连接")
+    logger.info("WebSocket 客户端已连接: %s", request.sid)
+    client_subscriptions[request.sid] = set()
 
 @socketio.on('disconnect')
 def handle_disconnect():
-    logger.info("WebSocket 客户端已断开")
+    logger.info("WebSocket 客户端已断开: %s", request.sid)
+    client_subscriptions.pop(request.sid, None)
 
 @socketio.on('subscribe_kline')
 def handle_subscribe_kline(data):
     """客户端订阅K线实时推送"""
     interval = data.get('interval', '1m')
-    logger.info("WebSocket 客户端订阅 %s K线", interval)
+    # 确保 sid 存在（connect 事件可能晚于 subscribe）
+    if request.sid not in client_subscriptions:
+        client_subscriptions[request.sid] = set()
+    client_subscriptions[request.sid].add(interval)
+    logger.info("WebSocket 客户端 %s 订阅 %s K线", request.sid, interval)
     
     # 立即发送一次当前最新数据
     latest_klines = get_bybit_latest(interval, limit=1)
@@ -84,16 +94,34 @@ def handle_subscribe_kline(data):
             'is_new': False
         })
 
+@socketio.on('unsubscribe_kline')
+def handle_unsubscribe_kline(data):
+    """客户端取消订阅"""
+    interval = data.get('interval', '1m')
+    if request.sid in client_subscriptions:
+        client_subscriptions[request.sid].discard(interval)
+        logger.info("WebSocket 客户端 %s 取消订阅 %s K线", request.sid, interval)
+
+def get_active_intervals():
+    """获取所有客户端订阅的时间级别集合"""
+    active = set()
+    for intervals in client_subscriptions.values():
+        active.update(intervals)
+    return active
+
 # ── 后台线程：定时推送最新K线 ──
 def kline_pusher():
-    """后台线程：每秒检查并推送最新K线"""
+    """后台线程：每秒检查并推送最新K线（只推送有订阅的）"""
     last_klines = {}
     
     while True:
         try:
             socketio.sleep(1)  # 每秒检查一次
             
-            for interval in ['1m', '5m', '15m', '1h', '4h', '1d']:
+            # 只查询有客户端订阅的时间级别
+            active_intervals = get_active_intervals()
+            
+            for interval in active_intervals:
                 try:
                     latest = get_bybit_latest(interval, limit=1)
                     if not latest:
